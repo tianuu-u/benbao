@@ -1,0 +1,4355 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>星露谷 · 给你的生日小镇</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="游戏截图/Animals_Icon.png" />
+  <!-- 像像素风的字体，接近星露谷 UI 的感觉 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    /* 加载中文像素字体 zpix */
+    @font-face {
+      font-family: 'zpix';
+      src: url('字体/zpix.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* —— 整体背景：星露谷天空 + 草地 —— */
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      color: #2b1a10;
+      background:
+        radial-gradient(circle at 10% 0%, rgba(255,255,255,0.8) 0, rgba(255,255,255,0) 40%),
+        radial-gradient(circle at 80% 0%, rgba(255,255,255,0.7) 0, rgba(255,255,255,0) 45%),
+        linear-gradient(#7fd1ff 0%, #aee6ff 30%, #7fd080 55%, #3f8b52 90%, #275531 100%);
+    }
+
+    .star-bg {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -1;
+      background-image:
+        radial-gradient(circle at 20% 30%, rgba(255,255,255,0.45) 0, transparent 50%),
+        radial-gradient(circle at 70% 20%, rgba(255,255,255,0.3) 0, transparent 45%),
+        radial-gradient(circle at 40% 60%, rgba(255,255,255,0.2) 0, transparent 45%);
+      mix-blend-mode: screen;
+      opacity: 0.4;
+    }
+
+    main {
+      width: 100%;
+      max-width: 1100px;
+    }
+
+    /* —— 通用卡片 —— */
+    .card {
+      background: #fff4da;
+      border-radius: 18px;
+      border: 2px solid #c47a32;
+      box-shadow:
+        0 14px 35px rgba(0,0,0,0.35),
+        0 0 0 4px rgba(255,255,255,0.6) inset;
+      padding: 24px;
+      margin-bottom: 24px;
+      position: relative;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      top: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #955428, #c47a32, #955428);
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    /* —— 顶部祝福区域 —— */
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 2.2fr) minmax(0, 1.2fr);
+      gap: 20px;
+      align-items: center;
+    }
+
+    @media (max-width: 800px) {
+      .hero {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+      .hero-right {
+        justify-content: center;
+        align-items: center;
+      }
+      .hero-logo {
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .hero-note {
+        text-align: center;
+      }
+    }
+
+    .hero-left {
+      padding-top: 8px;
+    }
+
+    .hero-title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .hero-title {
+      font-family: "zpix", "Press Start 2P", "Courier New", monospace, system-ui, sans-serif;
+      font-size: 1.3rem;
+      letter-spacing: 1px;
+      color: #3b2413;
+      text-shadow: 2px 2px 0px rgba(255, 255, 255, 0.6);
+      line-height: 1.6;
+    }
+
+    .hero-sub {
+      font-family: "zpix", "Press Start 2P", monospace, system-ui, sans-serif;
+      font-size: 0.95rem;
+      color: #5a3c24;
+      max-width: 650px;
+      line-height: 1.8;
+      margin-top: 12px;
+    }
+
+    .hero-sub em {
+      color: #c47a32;
+      font-weight: bold;
+      font-style: normal;
+      background: rgba(255, 255, 255, 0.5);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .hero-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .tag {
+      font-family: "zpix", "Press Start 2P", monospace, system-ui, sans-serif;
+      padding: 5px 11px;
+      border-radius: 999px;
+      border: 1px solid #c47a32;
+      background: linear-gradient(#ffe9b8, #ffd28e);
+      font-size: 0.8rem;
+      color: #5a3316;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.8) inset;
+    }
+
+    .hero-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 10px;
+    }
+
+    .hero-logo {
+      width: 220px;
+      max-width: 100%;
+      image-rendering: pixelated;
+      filter: drop-shadow(0 6px 4px rgba(0,0,0,0.5));
+    }
+
+    .hero-icons {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .hero-icons img {
+      width: 32px;
+      height: 32px;
+      image-rendering: pixelated;
+    }
+
+    .hero-note {
+      font-size: 0.8rem;
+      color: #6a4523;
+      text-align: right;
+    }
+
+    /* —— 地图区域 —— */
+    .map-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .map-wrapper {
+      position: relative;
+      width: 100%;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 3px solid #2a5582;
+      box-shadow:
+        0 12px 28px rgba(0,0,0,0.45),
+        0 0 0 3px #f8f2da inset;
+      background: #000;
+    }
+
+    .map-wrapper img {
+      display: block;
+      width: 100%;
+      height: auto;
+      image-rendering: pixelated;
+    }
+
+    /* 小小"相册 Logo"——用一个菇菇图标当按钮 */
+    .memory-logo {
+      position: absolute;
+      top: 7%;
+      left: 8%;
+      transform: translate(-50%, -50%);
+      border: none;
+      padding: 4px;
+      border-radius: 12px;
+      background: rgba(255,244,218,0.9);
+      border: 2px solid #c47a32;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.5);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .memory-logo img {
+      width: 26px;
+      height: 26px;
+      image-rendering: pixelated;
+    }
+
+    .memory-logo span {
+      font-size: 0.7rem;
+      color: #5a3316;
+      white-space: nowrap;
+    }
+
+    .memory-logo:hover {
+      transform: translate(-50%, -52%) scale(1.03);
+    }
+
+    .map-label-bar {
+      font-family: "zpix", "Press Start 2P", monospace, system-ui, sans-serif;
+      margin-top: 6px;
+      width: 100%;
+      max-width: 600px;
+      border-radius: 999px;
+      padding: 7px 14px;
+      background: #f7e0a8;
+      border: 2px solid #c47a32;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      color: #5a3316;
+    }
+
+    .map-label-bar img {
+      width: 20px;
+      height: 20px;
+      image-rendering: pixelated;
+    }
+
+    /* —— 收集进度条 —— */
+    .progress-bar {
+      font-family: "zpix", "Press Start 2P", monospace, system-ui, sans-serif;
+      margin-top: 8px;
+      width: 100%;
+      max-width: 600px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #ffeec1;
+      border: 2px solid #c47a32;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 0.85rem;
+      color: #5a3316;
+    }
+
+    .progress-hearts {
+      display: flex;
+      gap: 4px;
+    }
+
+    .heart {
+      width: 14px;
+      height: 14px;
+      position: relative;
+      opacity: 0.3;
+    }
+
+    .heart::before {
+      content: "♥";
+      position: absolute;
+      inset: -3px 0 0 0;
+      font-size: 16px;
+      text-align: center;
+      color: #e57373;
+    }
+
+    .heart.filled {
+      opacity: 1;
+    }
+
+    .btn-final {
+      border-radius: 999px;
+      border: 1px solid #999;
+      background: linear-gradient(#ddd, #bbb);
+      color: #555;
+      font-size: 0.8rem;
+      padding: 5px 12px;
+      cursor: not-allowed;
+      white-space: nowrap;
+    }
+
+    .btn-final.unlocked {
+      border-color: #c47a32;
+      background: linear-gradient(135deg, #f7c46a, #e4972f);
+      color: #3b2413;
+      cursor: pointer;
+      box-shadow:
+        0 0 0 2px rgba(255,255,255,0.7) inset,
+        0 0 12px rgba(255,200,120,0.9);
+    }
+
+    /* —— 地图上发光点（位置已微调） —— */
+    .hotspot {
+      position: absolute;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px solid #ffea90;
+      background: radial-gradient(circle at 30% 30%, #fff7c2 0, #ffb34788 60%, #ffb34733 100%);
+      box-shadow:
+        0 0 10px rgba(255,234,144,0.9),
+        0 0 25px rgba(255,150,80,0.9);
+      transform: translate(-50%, -50%);
+      cursor: pointer;
+      transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+    }
+
+    .hotspot:hover {
+      transform: translate(-50%, -50%) scale(1.05);
+      box-shadow:
+        0 0 15px rgba(255,255,200,1),
+        0 0 35px rgba(255,170,90,1);
+    }
+
+    .hotspot::after {
+      content: attr(data-location);
+      position: absolute;
+      left: 50%;
+      top: -8px;
+      transform: translate(-50%, -100%);
+      background: rgba(44,28,15,0.9);
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-size: 0.7rem;
+      white-space: nowrap;
+      border: 1px solid #ffea90aa;
+      color: #ffefd5;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s ease-out, transform 0.15s ease-out;
+    }
+
+    .hotspot:hover::after {
+      opacity: 1;
+      transform: translate(-50%, -115%);
+    }
+
+    .footer {
+      font-family: "zpix", "Press Start 2P", monospace, system-ui, sans-serif;
+      font-size: 0.8rem;
+      color: #fbe6c5;
+      text-align: center;
+      margin-top: 12px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+    }
+
+    /* —— 通用弹窗蒙层 —— */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.55);
+      z-index: 20;
+    }
+
+    .modal-backdrop.active {
+      display: flex;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 460px;
+      background: #fdf0d2;
+      border-radius: 18px;
+      border: 3px solid #c47a32;
+      box-shadow: 0 22px 50px rgba(0,0,0,0.75);
+      padding: 18px 18px 20px;
+      position: relative;
+      color: #3b2413;
+    }
+
+    .modal::before {
+      content: "";
+      position: absolute;
+      top: -16px;
+      left: 20px;
+      right: 20px;
+      height: 10px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #955428, #c47a32, #955428);
+      box-shadow: 0 4px 4px rgba(0,0,0,0.4);
+    }
+
+    .modal-close {
+      position: absolute;
+      right: 10px;
+      top: 6px;
+      border: none;
+      background: none;
+      color: #5a3316;
+      font-size: 1.4rem;
+      cursor: pointer;
+    }
+
+    /* —— NPC 祝福弹窗 —— */
+    .modal-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 8px;
+    }
+
+    .modal-header img {
+      width: 80px;
+      height: auto;
+      border-radius: 10px;
+      border: 2px solid #c47a32;
+      background: #000;
+      image-rendering: pixelated;
+    }
+
+    .modal-header-text h3 {
+      font-family: "zpix", "Press Start 2P", monospace, system-ui, sans-serif;
+      font-size: 1.1rem;
+      margin-bottom: 4px;
+    }
+
+    .modal-header-text span {
+      font-family: "zpix", "Press Start 2P", monospace, system-ui, sans-serif;
+      font-size: 0.85rem;
+      color: #7a4a24;
+    }
+
+    .modal-body {
+      font-family: "zpix", "Press Start 2P", monospace, system-ui, sans-serif;
+      font-size: 0.95rem;
+      line-height: 1.7;
+      margin-top: 4px;
+      white-space: pre-line;
+    }
+
+    .modal-location {
+      margin-top: 8px;
+      font-size: 0.8rem;
+      color: #7a4a24;
+    }
+
+    .btn-row {
+      margin-top: 12px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      font-family: "zpix", "Press Start 2P", monospace, system-ui, sans-serif;
+      border-radius: 999px;
+      border: 1px solid #2a5582;
+      background: linear-gradient(135deg, #4479b4, #295686);
+      color: #fdf6e3;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.3);
+    }
+
+    .btn-secondary {
+      border-color: #c47a32;
+      background: linear-gradient(135deg, #c47a32, #8d4a18);
+    }
+
+    /* —— 最终来信弹窗 —— */
+    .final-modal {
+      max-width: 750px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      padding: 18px 18px 20px;
+    }
+
+    .final-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 10px;
+      flex-shrink: 0;
+    }
+
+    .final-title {
+      font-family: "zpix", "Press Start 2P", system-ui, sans-serif;
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+      color: #5a3316;
+      text-shadow: 0 0 3px #fff;
+      margin-bottom: 6px;
+      line-height: 1.6;
+    }
+
+    .final-sub {
+      font-size: 0.75rem;
+      color: #7a4a24;
+      font-family: "zpix", "Press Start 2P", system-ui, sans-serif;
+    }
+
+    .cake-area {
+      margin-top: 8px;
+      display: flex;
+      align-items: flex-end;
+      gap: 16px;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+
+    .cake-track {
+      position: relative;
+      width: 120px;
+      height: 120px;
+    }
+
+    .cake-sprite {
+      position: absolute;
+      left: 50%;
+      bottom: -20px;
+      transform: translateX(-50%);
+      width: 64px;
+      height: 64px;
+      image-rendering: pixelated;
+      opacity: 0;
+    }
+
+    .cake-animate {
+      animation: cakeFloat 2.8s ease-out forwards;
+    }
+
+    @keyframes cakeFloat {
+      0% {
+        transform: translate(-50%, 40px) scale(0.4);
+        opacity: 0;
+      }
+      40% {
+        transform: translate(-50%, -5px) scale(1);
+        opacity: 1;
+      }
+      60% {
+        transform: translate(-50%, 3px) scale(1.02);
+      }
+      80% {
+        transform: translate(-50%, -3px) scale(1);
+      }
+      100% {
+        transform: translate(-50%, 0) scale(1);
+        opacity: 0;
+      }
+    }
+
+    .cake-photo {
+      position: absolute;
+      left: 50%;
+      bottom: -20px;
+      transform: translateX(-50%);
+      width: 100px;
+      height: auto;
+      max-height: 100px;
+      border-radius: 8px;
+      border: 2px solid #c47a32;
+      image-rendering: pixelated;
+      opacity: 0;
+      transition: opacity 0.5s ease-in;
+    }
+
+    .cake-photo.show {
+      opacity: 1;
+    }
+
+    .final-hb-text {
+      font-family: "zpix", "Press Start 2P", system-ui, sans-serif;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: #b15b2b;
+      text-shadow: 0 0 3px #fff8e6;
+      margin-top: 6px;
+    }
+
+    .final-letter-wrapper {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      margin-top: 10px;
+    }
+
+    .final-letter {
+      font-family: "zpix", "Press Start 2P", system-ui, sans-serif;
+      line-height: 1.8;
+      color: #3b2413;
+      white-space: pre-line;
+      max-height: 400px;
+      overflow-y: auto;
+      padding-right: 8px;
+      flex: 1;
+      font-size: 0.9rem;
+    }
+
+    /* 信件文字大小变化设计 */
+    .final-letter br + br {
+      margin-top: 0.5em;
+    }
+
+    .final-letter {
+      font-size: 0.9rem;
+    }
+
+    /* 信件段落大小变化 */
+    .final-letter .paragraph-large {
+      font-size: 1.15rem;
+      font-weight: bold;
+      margin: 0.8em 0;
+    }
+
+    .final-letter .paragraph-medium {
+      font-size: 1.05rem;
+      margin: 0.6em 0;
+    }
+
+    .final-letter .paragraph-small {
+      font-size: 0.95rem;
+      margin: 0.4em 0;
+    }
+
+    .final-letter .paragraph-emphasis {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #8d4a18;
+      margin: 1em 0;
+    }
+
+    /* 最终信件弹窗右上角的蝴蝶 */
+    .final-butterfly {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      pointer-events: none;
+      z-index: 10;
+      image-rendering: pixelated;
+      opacity: 0.85;
+      animation: finalButterflyDance 6s ease-in-out infinite;
+    }
+
+    .final-butterfly img {
+      width: 100%;
+      height: 100%;
+      image-rendering: pixelated;
+    }
+
+    @keyframes finalButterflyDance {
+      0% {
+        transform: translate(0, 0) rotate(0deg);
+      }
+      20% {
+        transform: translate(-30px, -40px) rotate(10deg);
+      }
+      40% {
+        transform: translate(-60px, 20px) rotate(-8deg);
+      }
+      60% {
+        transform: translate(-30px, 50px) rotate(12deg);
+      }
+      80% {
+        transform: translate(20px, 30px) rotate(-10deg);
+      }
+      100% {
+        transform: translate(0, 0) rotate(0deg);
+      }
+    }
+
+    .final-letter::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .final-letter::-webkit-scrollbar-track {
+      background: #ffe9b8;
+      border-radius: 4px;
+    }
+
+    .final-letter::-webkit-scrollbar-thumb {
+      background: #c47a32;
+      border-radius: 4px;
+    }
+
+    .final-letter::-webkit-scrollbar-thumb:hover {
+      background: #a86528;
+    }
+
+    /* —— 合影相册弹窗 —— */
+    .gallery-modal {
+      max-width: 620px;
+    }
+
+    .gallery-title {
+      font-family: "zpix", "Press Start 2P", monospace, system-ui, sans-serif;
+      font-size: 1.1rem;
+      margin-bottom: 6px;
+    }
+
+    .gallery-sub {
+      font-family: "zpix", "Press Start 2P", monospace, system-ui, sans-serif;
+      font-size: 0.85rem;
+      color: #7a4a24;
+      margin-bottom: 10px;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .gallery-grid img {
+      width: 100%;
+      border-radius: 8px;
+      border: 2px solid #c47a32;
+      image-rendering: pixelated;
+      background: #000;
+    }
+
+    /* 烟花容器 */
+    #fireworksCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    #chickenIcon:hover {
+      transform: scale(1.1);
+    }
+
+    /* 星露谷风格音乐播放器 */
+    .sv-music-player {
+      position: fixed;
+      right: 32px;
+      bottom: 32px;
+      z-index: 55;
+      background: radial-gradient(circle at 20% 0%, rgba(255,255,255,0.15), transparent 55%),
+                  linear-gradient(180deg, #5a3b20 0%, #3a2312 55%, #2a140b 100%);
+      border-radius: 22px;
+      border: 3px solid #e49b4f;
+      box-shadow:
+        0 12px 20px rgba(0,0,0,0.6),
+        inset 0 0 0 2px rgba(255,255,255,0.25);
+      padding: 10px 16px 12px;
+      color: #fdf1d6;
+      font-family: "zpix", "Press Start 2P", monospace, system-ui, sans-serif;
+      font-size: 11px;
+      min-width: 260px;
+      image-rendering: pixelated;
+    }
+
+    @media (max-width: 768px) {
+      .sv-music-player {
+        right: 10px;
+        bottom: 10px;
+        min-width: 240px;
+        padding: 8px 12px 10px;
+        font-size: 10px;
+      }
+    }
+
+    .sv-music-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .sv-music-title-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .sv-music-note {
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      background: #1b2533;
+      box-shadow:
+        inset 0 0 0 2px #fdf5de,
+        0 0 0 2px #455a71;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+    }
+
+    .sv-music-track-name {
+      white-space: nowrap;
+      max-width: 170px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 0.55rem;
+    }
+
+    .sv-music-status-chip {
+      border-radius: 999px;
+      padding: 2px 8px;
+      background: linear-gradient(180deg, #ffe7b9, #f3c98a);
+      border: 1px solid rgba(255,255,255,0.6);
+      color: #5b3715;
+      font-size: 9px;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.4);
+      font-family: "zpix", "Press Start 2P", monospace, system-ui, sans-serif;
+    }
+
+    .sv-music-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .sv-music-btn {
+      flex: 0 0 auto;
+      width: 42px;
+      height: 32px;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(180deg, #29416b, #1b2942);
+      box-shadow:
+        0 3px 0 #0d1726,
+        0 0 0 2px rgba(255,255,255,0.16);
+      color: #f5f5ff;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.08s ease-out, box-shadow 0.08s ease-out;
+      font-family: "zpix", "Press Start 2P", monospace, system-ui, sans-serif;
+      image-rendering: pixelated;
+    }
+
+    .sv-music-btn:hover {
+      transform: translateY(1px);
+      box-shadow:
+        0 1px 0 #0d1726,
+        0 0 0 2px rgba(255,255,255,0.4),
+        0 0 8px rgba(156,187,255,0.7);
+    }
+
+    .sv-music-btn.sv-primary {
+      box-shadow:
+        0 3px 0 #0d1726,
+        0 0 0 2px #fefefe;
+    }
+
+    .sv-music-btn.sv-primary.active {
+      background: linear-gradient(180deg, #3b5da0, #223764);
+      box-shadow:
+        0 1px 0 #0d1726,
+        0 0 0 2px #ffffff,
+        0 0 10px rgba(156,187,255,0.9);
+    }
+
+    .sv-music-btn-icon {
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    .sv-music-progress {
+      position: relative;
+      flex: 1;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(12, 12, 18, 0.65);
+      overflow: hidden;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);
+      cursor: pointer;
+    }
+
+    .sv-music-progress-fill {
+      position: absolute;
+      inset: 0;
+      width: 0%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #ffe08a, #ffb85a, #ffeeb6);
+      box-shadow:
+        0 0 6px rgba(255,225,140,0.9),
+        0 0 12px rgba(255,196,120,0.9);
+      transition: width 0.1s linear;
+    }
+
+    .sv-music-time {
+      margin-top: 6px;
+      font-size: 9px;
+      opacity: 0.8;
+      display: flex;
+      justify-content: space-between;
+      font-family: "zpix", "Press Start 2P", monospace, system-ui, sans-serif;
+    }
+
+    /* 星露谷登录 / 迎接场景：样式 */
+    .npc-login-overlay {
+      position: fixed;
+      inset: 0;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 130;
+      font-family: "zpix", "Press Start 2P", system-ui, sans-serif;
+      transition: opacity 0.4s ease;
+    }
+
+    .npc-login-window {
+      display: flex;
+      gap: 24px;
+      padding: 20px 28px;
+      background: #5a3a28;
+      border-radius: 24px;
+      box-shadow: 0 0 0 4px #f7c98b, 0 16px 40px rgba(0,0,0,0.6);
+      max-width: 720px;
+      width: 90%;
+    }
+
+    .npc-login-portrait {
+      flex: 0 0 165px;
+      height: 165px;
+      background: #3b2518;
+      border-radius: 16px;
+      padding: 6px;
+      box-shadow: inset 0 0 0 2px #f6d7a4;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .npc-login-portrait img {
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      image-rendering: pixelated;
+    }
+
+    .npc-login-dialog {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .npc-login-name-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 8px;
+      color: #ffe9b8;
+      text-shadow: 0 2px 0 #3b2518;
+    }
+
+    .npc-name {
+      font-size: 18px;
+    }
+
+    .npc-title {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+
+    .npc-dialog-box {
+      background: #ffeacd;
+      border-radius: 14px;
+      padding: 12px 14px;
+      box-shadow: 0 0 0 3px #e1b067;
+    }
+
+    .npc-dialog-text {
+      font-size: 14px;
+      line-height: 1.7;
+      color: #4b2b16;
+    }
+
+    .npc-login-options {
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .npc-option-btn {
+      border: none;
+      outline: none;
+      padding: 8px 12px;
+      border-radius: 12px;
+      background: #365599;
+      color: #fff;
+      font-size: 13px;
+      text-align: left;
+      cursor: pointer;
+      box-shadow: 0 3px 0 #132340;
+      transition: transform 0.06s, box-shadow 0.06s, background 0.15s;
+      font-family: "zpix", "Press Start 2P", system-ui;
+    }
+
+    .npc-option-btn:hover {
+      transform: translateY(-1px);
+      background: #4d6ec0;
+    }
+
+    .npc-option-btn:active {
+      transform: translateY(1px);
+      box-shadow: 0 1px 0 #132340;
+    }
+
+    .npc-enter-btn {
+      text-align: center;
+      justify-content: center;
+    }
+
+    .npc-login-hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    @media (max-width: 640px) {
+      .npc-login-window {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+
+    /* 开场动画 */
+    #introOverlay {
+      position: fixed;
+      inset: 0;
+      background: transparent;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 120;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.8s ease-out;
+    }
+
+    /* 隐藏主页面内容，直到开场动画结束 */
+    body.npc-login-active main,
+    body.intro-active main,
+    body.npc-login-active .sv-music-player,
+    body.intro-active .sv-music-player {
+      display: none;
+    }
+
+    /* 电视机组件样式 */
+    /* 悬浮入口 */
+    .tv-widget-trigger {
+      position: fixed;
+      bottom: 32px;
+      left: 32px;
+      width: 60px;
+      cursor: pointer;
+      z-index: 90;
+      transition: transform 0.2s;
+      filter: drop-shadow(0 4px 4px rgba(0,0,0,0.5));
+    }
+
+    .tv-widget-trigger:hover {
+      transform: scale(1.1) rotate(-5deg);
+    }
+
+    .tv-widget-trigger img {
+      width: 100%;
+      image-rendering: pixelated;
+    }
+
+    .tv-tooltip {
+      position: absolute;
+      top: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.8);
+      color: #fff;
+      font-size: 10px;
+      padding: 4px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+      font-family: "zpix", sans-serif;
+    }
+
+    .tv-widget-trigger:hover .tv-tooltip {
+      opacity: 1;
+    }
+
+    @media (max-width: 768px) {
+      .tv-widget-trigger {
+        bottom: 10px;
+        left: 10px;
+        width: 50px;
+      }
+    }
+
+    /* === 电话入口 === */
+    .sv-phone-trigger {
+      position: fixed;
+      left: 100px;
+      bottom: 32px;
+      width: 60px;
+      cursor: pointer;
+      z-index: 90;
+      transition: transform 0.2s;
+      filter: drop-shadow(0 4px 4px rgba(0,0,0,0.5));
+    }
+
+    .sv-phone-trigger:hover {
+      transform: scale(1.1) rotate(-5deg);
+    }
+
+    .sv-phone-trigger img {
+      width: 100%;
+      image-rendering: pixelated;
+    }
+
+    .phone-tooltip {
+      position: absolute;
+      top: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.8);
+      color: #fff;
+      font-size: 10px;
+      padding: 4px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+      font-family: "zpix", sans-serif;
+    }
+
+    .sv-phone-trigger:hover .phone-tooltip {
+      opacity: 1;
+    }
+
+    @media (max-width: 768px) {
+      .sv-phone-trigger {
+        left: 80px;
+        bottom: 10px;
+        width: 50px;
+      }
+    }
+
+    /* === 通话弹窗 === */
+    .sv-phone-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(2px);
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.3s;
+    }
+
+    .sv-phone-modal-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .sv-phone-container {
+      width: 90%;
+      max-width: 420px;
+      background: #dfce9b;
+      border: 4px solid #5b3819;
+      border-radius: 16px;
+      box-shadow: inset 0 0 0 4px #ecca8c, 0 20px 50px rgba(0,0,0,0.8);
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+      font-family: "zpix", sans-serif;
+      position: relative;
+    }
+
+    .phone-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      border-bottom: 2px solid #c4a484;
+      padding-bottom: 8px;
+    }
+
+    .phone-signal {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: #5b3819;
+    }
+
+    .signal-dot {
+      width: 8px;
+      height: 8px;
+      background: #50c878;
+      border-radius: 50%;
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink { 50% { opacity: 0.4; } }
+
+    .phone-close-btn {
+      background: #d94c4c;
+      border: 2px solid #fff;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 99px;
+      cursor: pointer;
+      font-family: "zpix", sans-serif;
+      font-size: 12px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .phone-npc-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      background: rgba(255, 255, 255, 0.3);
+      padding: 8px;
+      border-radius: 12px;
+    }
+
+    .phone-portrait-frame {
+      width: 64px;
+      height: 64px;
+      background: #5b3819;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 2px solid #c4a484;
+      flex-shrink: 0;
+    }
+
+    .phone-portrait-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      image-rendering: pixelated;
+    }
+
+    .phone-npc-text .name {
+      font-size: 18px;
+      color: #3a2212;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .phone-npc-text .status {
+      font-size: 12px;
+      color: #7c5c43;
+    }
+
+    .phone-chat-box {
+      height: 300px;
+      overflow-y: auto;
+      background: rgba(255, 255, 255, 0.5);
+      border: 2px solid #c4a484;
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 12px;
+      scrollbar-width: thin;
+      scrollbar-color: #8b5a2b #ecca8c;
+    }
+
+    .msg-row {
+      display: flex;
+      width: 100%;
+    }
+
+    .msg-row.npc { justify-content: flex-start; }
+    .msg-row.player { justify-content: flex-end; }
+
+    .msg-row .bubble {
+      max-width: 80%;
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-size: 14px;
+      line-height: 1.5;
+      position: relative;
+      word-wrap: break-word;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .msg-row.npc .bubble {
+      background: #fff2d6;
+      border: 2px solid #b88d65;
+      color: #4b2b16;
+      border-bottom-left-radius: 2px;
+    }
+
+    .msg-row.player .bubble {
+      background: #4a9eff;
+      border: 2px solid #2e6ebf;
+      color: white;
+      border-bottom-right-radius: 2px;
+    }
+
+    .phone-input-area {
+      display: flex;
+      gap: 8px;
+    }
+
+    #phoneInput {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      border: 2px solid #8b5a2b;
+      background: #fff;
+      font-family: "zpix", sans-serif;
+      font-size: 14px;
+      outline: none;
+    }
+
+    #phoneSendBtn {
+      background: #66a845;
+      border: 2px solid #3d7326;
+      color: white;
+      padding: 0 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: "zpix", sans-serif;
+      font-size: 14px;
+      transition: transform 0.1s;
+    }
+
+    #phoneSendBtn:active { transform: scale(0.95); }
+    #phoneSendBtn:disabled { background: #ccc; border-color: #999; cursor: not-allowed; }
+
+    /* 电视弹窗 */
+    .tv-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(2px);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.3s;
+    }
+
+    .tv-modal-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .tv-modal-container {
+      background: #3e2723; /* 电视柜颜色 */
+      padding: 20px;
+      border-radius: 10px;
+      border: 4px solid #8d6e63;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 90%;
+      max-width: 400px;
+      position: relative;
+    }
+
+    .tv-close-btn {
+      position: absolute;
+      top: -15px;
+      right: -15px;
+      background: #d32f2f;
+      color: white;
+      border: 2px solid #fff;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+      font-family: "zpix", sans-serif;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* 电视显示区核心布局 */
+    .tv-display-area {
+      position: relative;
+      width: 200px; /* 根据素材比例调整 */
+      height: auto;
+      margin-bottom: 15px;
+    }
+
+    .tv-frame-img {
+      width: 100%;
+      display: block;
+      image-rendering: pixelated;
+    }
+
+    /* 屏幕内容绝对定位 */
+    .tv-screen-content {
+      position: absolute;
+      top: 14%;  /* 根据TVprogram.png手动调整 */
+      left: 12%; /* 根据TVprogram.png手动调整 */
+      width: 78%; /* 根据TVprogram.png手动调整 */
+      height: 52%; /* 根据TVprogram.png手动调整 */
+      background: #1a1a1a;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 2px;
+    }
+
+    .tv-screen-content img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover; /* 铺满屏幕 */
+      image-rendering: pixelated;
+    }
+
+    .tv-screen-content img.hidden {
+      display: none;
+    }
+
+    /* 雪花屏动画 */
+    .tv-static {
+      position: absolute;
+      inset: 0;
+      background-image: repeating-radial-gradient(circle, #333 0, #000 2px);
+      background-size: 4px 4px;
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
+    .tv-controls-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+
+    .tv-channel-btn {
+      background: #ffcd45;
+      border: 2px solid #d84315;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-family: "zpix", sans-serif;
+      font-size: 12px;
+      color: #3e2723;
+      cursor: pointer;
+      box-shadow: 0 2px 0 #8d6e63;
+      transition: transform 0.1s;
+    }
+
+    .tv-channel-btn:hover {
+      background: #ffe082;
+      transform: translateY(-2px);
+    }
+
+    .tv-channel-btn:active {
+      transform: translateY(0);
+      box-shadow: none;
+    }
+
+    .tv-dialogue-box {
+      width: 100%;
+      background: #ffecb3;
+      border: 3px solid #795548;
+      border-radius: 8px;
+      padding: 12px;
+      font-family: "zpix", sans-serif;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #3e2723;
+      min-height: 80px;
+      box-shadow: inset 0 0 10px rgba(121, 85, 72, 0.2);
+    }
+
+    body.npc-login-active .tv-widget-trigger,
+    body.intro-active .tv-widget-trigger,
+    body.npc-login-active .sv-phone-trigger,
+    body.intro-active .sv-phone-trigger {
+      display: none;
+    }
+
+    /* 可点击的祝尼魔样式 */
+    #clickableJunimo {
+      image-rendering: pixelated;
+      display: block;
+    }
+
+    #clickableJunimo:hover {
+      transform: scale(1.1);
+    }
+
+    /* 祝尼魔呼吸动画 */
+    @keyframes junimoBreathe {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+    }
+
+    #clickableJunimo {
+      animation: junimoBreathe 2s ease-in-out infinite;
+    }
+
+    /* 祝尼魔弹跳动画 */
+    @keyframes junimoBounce {
+      0%, 100% {
+        transform: translateY(0) scale(1);
+      }
+      50% {
+        transform: translateY(-15px) scale(1.1);
+      }
+    }
+
+    #clickableJunimo.bounce {
+      animation: junimoBounce 0.5s ease-in-out !important;
+    }
+
+    /* 天降异象动画容器 */
+    .treasure-rain-overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1000;
+      overflow: hidden;
+    }
+
+    /* 掉落物品样式 */
+    .falling-item {
+      position: absolute;
+      image-rendering: pixelated;
+      pointer-events: none;
+    }
+
+    .falling-shorts {
+      width: 40px;
+      height: 40px;
+      animation: fallDown 3s linear forwards, rotateItem 1s linear infinite;
+    }
+
+    .falling-statue {
+      width: 350px;
+      height: 350px;
+      animation: fallStatue 2s ease-out forwards, glowStatue 1s ease-in-out infinite, bounceStatue 0.6s ease-in-out infinite;
+    }
+
+    @keyframes bounceStatue {
+      0%, 100% {
+        transform: translateX(-50%) translateY(-50%) scale(1) rotate(0deg);
+      }
+      50% {
+        transform: translateX(-50%) translateY(-50%) scale(1.05) rotate(5deg);
+      }
+    }
+
+    @keyframes fallDown {
+      0% {
+        top: -50px;
+        opacity: 1;
+      }
+      100% {
+        top: 100vh;
+        opacity: 0.8;
+      }
+    }
+
+    @keyframes rotateItem {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes fallStatue {
+      0% {
+        top: -400px;
+        left: 50%;
+        transform: translateX(-50%) scale(0.3) rotate(0deg);
+        opacity: 0;
+      }
+      30% {
+        opacity: 1;
+      }
+      100% {
+        top: 50%;
+        left: 50%;
+        transform: translateX(-50%) translateY(-50%) scale(1) rotate(720deg);
+        opacity: 1;
+      }
+    }
+
+    @keyframes glowStatue {
+      0%, 100% {
+        filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8));
+      }
+      50% {
+        filter: drop-shadow(0 0 30px rgba(255, 215, 0, 1));
+      }
+    }
+
+    /* 祝尼魔对话框 */
+    .junimo-dialog {
+      position: fixed;
+      background: #ffecb3;
+      border: 3px solid #795548;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-family: "zpix", "Press Start 2P", monospace, system-ui, sans-serif;
+      font-size: 14px;
+      color: #3e2723;
+      z-index: 1001;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      animation: dialogPop 0.3s ease-out;
+      white-space: nowrap;
+    }
+
+    @keyframes dialogPop {
+      0% {
+        transform: scale(0.8);
+        opacity: 0;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    /* 天降异象文字提示 */
+    .treasure-message {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: none;
+      color: #ffcd45;
+      padding: 0;
+      border: none;
+      font-family: "zpix", "Press Start 2P", monospace, system-ui, sans-serif;
+      font-size: 24px;
+      text-align: center;
+      z-index: 1002;
+      animation: messageFade 4s ease-in-out forwards;
+      text-shadow: 
+        3px 3px 0px #000,
+        -1px -1px 0px #000,
+        1px -1px 0px #000,
+        -1px 1px 0px #000;
+    }
+
+    @keyframes messageFade {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+      }
+      20% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+      80% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+      }
+    }
+
+    /* 转场动画层 */
+    #transitionOverlay {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      background: transparent !important;
+      z-index: 10000 !important;
+      display: none;
+      overflow: hidden;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+    
+    /* 确保转场时隐藏所有底层内容 */
+    body.transitioning {
+      overflow: hidden !important;
+    }
+    
+    /* 隐藏 body 的所有直接子元素（除了转场层） */
+    body.transitioning > *:not(#transitionOverlay) {
+      display: none !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
+    
+    body.transitioning main,
+    body.transitioning .sv-music-player,
+    body.transitioning #npc-login-overlay,
+    body.transitioning #introOverlay,
+    body.transitioning .star-bg {
+      display: none !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
+
+    #transitionOverlay.show {
+      display: block;
+    }
+
+    .transition-dog {
+      position: absolute;
+      left: -200px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 120px;
+      height: auto;
+      image-rendering: pixelated;
+      z-index: 10001;
+    }
+
+    .transition-junimo {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 30px;
+      height: auto;
+      image-rendering: pixelated;
+      z-index: 10001;
+    }
+
+    /* 新增的玩偶元素样式 */
+    .transition-plush {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 40px;
+      height: auto;
+      image-rendering: pixelated;
+      z-index: 10001;
+    }
+
+    /* 大号玩偶（Lg._Futan_Bear.png） */
+    .transition-plush.large {
+      width: 120px;
+    }
+
+    /* 祝尼魔位置 */
+    #transitionJunimo1 {
+      top: 50%;
+      left: -200px;
+    }
+
+    /* 粉色祝尼魔位置（用于第二次转场） */
+    #transitionPinkJunimo {
+      top: 50%;
+      left: -200px;
+      width: 75px; /* 放大粉色祝尼魔（2.5倍） */
+      height: auto;
+    }
+
+    /* 举着星之果实的祝尼魔位置（跟在粉色祝尼魔后面） */
+    #transitionStarJunimo {
+      top: 50%;
+      left: -350px; /* 起始位置更靠后，形成一前一后的效果 */
+      width: 75px; /* 和粉色祝尼魔一样大 */
+      height: auto;
+    }
+
+    /* 小狗从左往右跑的动画 - 使用 left 属性 */
+    @keyframes dogRun {
+      from {
+        left: var(--start-left, -200px);
+      }
+      to {
+        left: calc(100% + 200px);
+      }
+    }
+
+    /* 粉色祝尼魔慢速跑动画 - 6秒 */
+    @keyframes pinkJunimoRun {
+      from {
+        left: var(--start-left, -200px);
+      }
+      to {
+        left: calc(100% + 200px);
+      }
+    }
+
+    /* 祝尼魔蹦跳动画 - 使用 transform: translateY，不会与 left 动画冲突 */
+    @keyframes junimoBounce {
+      0%, 100% {
+        transform: translateY(-50%);
+      }
+      50% {
+        transform: translateY(calc(-50% - 60px));
+      }
+    }
+
+    /* 为每个玩偶创建不同高度的蹦跳动画 */
+    @keyframes plushBounce1 {
+      0%, 100% {
+        transform: translateY(-50%);
+      }
+      50% {
+        transform: translateY(calc(-50% - 40px));
+      }
+    }
+
+    @keyframes plushBounce2 {
+      0%, 100% {
+        transform: translateY(-50%);
+      }
+      50% {
+        transform: translateY(calc(-50% - 70px));
+      }
+    }
+
+    @keyframes plushBounce3 {
+      0%, 100% {
+        transform: translateY(-50%);
+      }
+      50% {
+        transform: translateY(calc(-50% - 50px));
+      }
+    }
+
+    @keyframes plushBounce4 {
+      0%, 100% {
+        transform: translateY(-50%);
+      }
+      50% {
+        transform: translateY(calc(-50% - 80px));
+      }
+    }
+
+    .transition-dog.animate {
+      animation: dogRun 7s ease-in-out forwards;
+    }
+
+    .transition-junimo.animate {
+      animation: 
+        dogRun 7s ease-in-out forwards,
+        junimoBounce 0.5s ease-in-out infinite;
+      animation-fill-mode: forwards;
+    }
+
+    /* 粉色祝尼魔动画 - 慢速 */
+    #transitionPinkJunimo.animate {
+      animation: 
+        pinkJunimoRun 6s ease-in-out forwards,
+        junimoBounce 0.5s ease-in-out infinite;
+      animation-fill-mode: forwards;
+    }
+
+    /* 举着星之果实的祝尼魔动画 - 跟在粉色祝尼魔后面 */
+    #transitionStarJunimo.animate {
+      animation: 
+        pinkJunimoRun 6s ease-in-out forwards,
+        junimoBounce 0.5s ease-in-out infinite;
+      animation-fill-mode: forwards;
+      animation-delay: 0.3s; /* 稍微延迟，形成一前一后的效果 */
+    }
+
+    /* 每个玩偶使用不同的蹦跳高度动画 */
+    #transitionPlush1.animate {
+      animation: 
+        dogRun 7s ease-in-out forwards,
+        plushBounce1 0.5s ease-in-out infinite;
+      animation-fill-mode: forwards;
+    }
+
+    #transitionPlush2.animate {
+      animation: 
+        dogRun 7s ease-in-out forwards,
+        plushBounce2 0.5s ease-in-out infinite;
+      animation-fill-mode: forwards;
+    }
+
+    #transitionPlush3.animate {
+      animation: 
+        dogRun 7s ease-in-out forwards,
+        plushBounce3 0.5s ease-in-out infinite;
+      animation-fill-mode: forwards;
+    }
+
+    #transitionPlush4.animate {
+      animation: 
+        dogRun 7s ease-in-out forwards,
+        plushBounce4 0.5s ease-in-out infinite;
+      animation-fill-mode: forwards;
+    }
+
+    #introOverlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    #introOverlay.hide {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .intro-inner {
+      text-align: center;
+      color: #f5f0d0;
+      font-family: "zpix", "Press Start 2P", monospace, system-ui, sans-serif;
+      font-size: 0.75rem;
+      image-rendering: pixelated;
+    }
+
+    .intro-inner img {
+      width: auto;
+      height: 120px;
+      max-width: 150px;
+      image-rendering: pixelated;
+      margin-bottom: 12px;
+      filter: drop-shadow(0 0 8px rgba(255, 180, 120, 0.9));
+      object-fit: contain;
+    }
+
+    .intro-subtext {
+      margin-top: 8px;
+      font-size: 0.65rem;
+      opacity: 0.7;
+      font-family: "zpix", "Press Start 2P", monospace, system-ui, sans-serif;
+    }
+
+    /* 飞舞的蝴蝶 */
+    .butterfly {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      pointer-events: none;
+      z-index: 121;
+      image-rendering: pixelated;
+      opacity: 0.9;
+    }
+
+    .butterfly img {
+      width: 100%;
+      height: 100%;
+      image-rendering: pixelated;
+    }
+
+    @keyframes butterflyFly {
+      0% {
+        transform: translate(0, 0) rotate(0deg);
+      }
+      25% {
+        transform: translate(100px, -80px) rotate(15deg);
+      }
+      50% {
+        transform: translate(200px, 50px) rotate(-10deg);
+      }
+      75% {
+        transform: translate(100px, 120px) rotate(10deg);
+      }
+      100% {
+        transform: translate(0, 0) rotate(0deg);
+      }
+    }
+
+    .butterfly.animate {
+      animation: butterflyFly 8s ease-in-out infinite;
+    }
+
+    /* 点击爆出的作物 */
+    .pop-crop-item {
+      position: absolute;
+      width: 40px; /* 稍微大一点，更有满足感 */
+      height: auto;
+      pointer-events: none; /* 关键：不阻挡后续点击 */
+      image-rendering: pixelated;
+      z-index: 9999;
+      filter: drop-shadow(0 4px 4px rgba(0,0,0,0.3));
+    }
+
+    /* 方案一：喷泉式散射 (Fountain Explosion) */
+    .pop-crop-item.fountain {
+      animation: cropFountain 1s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    }
+
+    @keyframes cropFountain {
+      0% {
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 1;
+      }
+      50% {
+        /* 飞到最高点，稍微放大 */
+        transform: translate(calc(-50% + var(--tx) * 0.5), calc(-50% + var(--ty) + -50px)) scale(1.2) rotate(180deg);
+        opacity: 1;
+      }
+      100% {
+        /* 落下，并且飞得更远 */
+        transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(0.8) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    /* 方案二：悬浮气球 (Floating Balloon) */
+    .pop-crop-item.float {
+      animation: cropFloatUp 1.2s ease-out forwards;
+    }
+
+    @keyframes cropFloatUp {
+      0% {
+        transform: translate(-50%, -50%) scale(0) rotate(0deg);
+        opacity: 0;
+      }
+      20% {
+        /* 快速弹出 */
+        transform: translate(-50%, -50%) scale(1.2) rotate(-10deg);
+        opacity: 1;
+      }
+      50% {
+        /* 向右摇摆 */
+        transform: translate(-30%, -80px) scale(1) rotate(10deg);
+      }
+      80% {
+        /* 向左摇摆 */
+        transform: translate(-70%, -120px) scale(1) rotate(-5deg);
+        opacity: 0.8;
+      }
+      100% {
+        /* 向上消失 */
+        transform: translate(-50%, -150px) scale(0.8) rotate(0deg);
+        opacity: 0;
+      }
+    }
+
+    /* 方案三：暴击数字风格 (Critical Hit) */
+    .pop-crop-item.crit {
+      animation: cropCrit 0.6s steps(10) forwards;
+    }
+
+    @keyframes cropCrit {
+      0% {
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 0;
+      }
+      15% {
+        /* 瞬间放大，产生冲击感 */
+        transform: translate(-50%, -80px) scale(1.5);
+        opacity: 1;
+      }
+      30% {
+        /* 稍微回弹 */
+        transform: translate(-50%, -60px) scale(1.2);
+      }
+      70% {
+        /* 悬停一会儿 */
+        transform: translate(-50%, -60px) scale(1.2);
+        opacity: 1;
+      }
+      100% {
+        /* 快速缩小消失 */
+        transform: translate(-50%, -100px) scale(0);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="star-bg"></div>
+  <canvas id="fireworksCanvas"></canvas>
+
+  <!-- NPC 登录 / 迎宾遮罩层 -->
+  <div id="npc-login-overlay" class="npc-login-overlay">
+    <div class="npc-login-window">
+      <div class="npc-login-portrait">
+        <img id="npc-login-portrait-img" src="" alt="npc portrait" />
+      </div>
+      <div class="npc-login-dialog">
+        <div class="npc-login-name-row">
+          <span id="npc-login-name" class="npc-name"></span>
+          <span id="npc-login-title" class="npc-title"></span>
+        </div>
+        <div class="npc-dialog-box">
+          <div id="npc-login-dialog-text" class="npc-dialog-text"></div>
+        </div>
+        <div id="npc-login-options" class="npc-login-options"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 转场动画层 -->
+  <div id="transitionOverlay">
+    <img src="游戏截图/Dog.gif" alt="Dog" class="transition-dog" id="transitionDog" />
+    <img src="游戏截图/Junimo.gif" alt="Junimo" class="transition-junimo" id="transitionJunimo1" />
+    <!-- 新增的玩偶元素，一个接一个跟在后面 -->
+    <img src="游戏截图/Futan_Bear.png" alt="Futan Bear" class="transition-plush" id="transitionPlush1" />
+    <img src="游戏截图/Futan_Rabbit.png" alt="Futan Rabbit" class="transition-plush" id="transitionPlush2" />
+    <img src="游戏截图/Lg._Futan_Bear.png" alt="Large Futan Bear" class="transition-plush large" id="transitionPlush3" />
+    <img src="游戏截图/Plush_Bunny.png" alt="Plush Bunny" class="transition-plush" id="transitionPlush4" />
+    <!-- 粉色祝尼魔（用于第二次转场） -->
+    <img src="游戏截图/h0o7lg5yg3y51.gif" alt="Pink Junimo" class="transition-junimo" id="transitionPinkJunimo" style="display: none;" />
+    <!-- 举着星之果实的祝尼魔（跟在粉色祝尼魔后面） -->
+    <img src="游戏截图/ha7a0v3yg3y51.gif" alt="Star Fruit Junimo" class="transition-junimo" id="transitionStarJunimo" style="display: none;" />
+  </div>
+
+  <!-- 开场动画 -->
+  <div id="introOverlay">
+    <!-- 飞舞的蝴蝶 -->
+    <div class="butterfly" id="butterfly1">
+      <img src="游戏截图/ButterflyAnimated.gif" alt="Butterfly" />
+    </div>
+    <div class="butterfly" id="butterfly2">
+      <img src="游戏截图/ButterflyAnimated.gif" alt="Butterfly" />
+    </div>
+    <div class="butterfly" id="butterfly3">
+      <img src="游戏截图/ButterflyAnimated.gif" alt="Butterfly" />
+    </div>
+    
+    <div class="intro-inner">
+      <!-- 用 Dog_4.png 图标当 LOGO -->
+      <img src="游戏截图/Dog_4.png" alt="Dog" />
+      <div>欢迎来到星露谷</div>
+      <div class="intro-subtext">点击继续 · Click to start</div>
+    </div>
+  </div>
+
+  <!-- 电视机组件 -->
+  <div class="tv-widget-trigger" id="tvTrigger">
+    <img src="游戏截图/TVprogram.png" alt="TV">
+    <span class="tv-tooltip">查看早安频道</span>
+  </div>
+
+  <div class="tv-modal-overlay hidden" id="tvModalOverlay">
+    <div class="tv-modal-container">
+      <button class="tv-close-btn" id="tvCloseBtn">×</button>
+      
+      <div class="tv-display-area">
+        <img src="游戏截图/TVprogram.png" class="tv-frame-img" alt="TV Frame">
+        <div class="tv-screen-content">
+          <img id="tvChannelImg" src="" alt="Channel" class="hidden">
+          <div id="tvStatic" class="tv-static"></div>
+        </div>
+      </div>
+      <div class="tv-controls-row">
+        <button class="tv-channel-btn" data-channel="weather">天气预报</button>
+        <button class="tv-channel-btn" data-channel="fortune">算命占卜</button>
+        <button class="tv-channel-btn" data-channel="cooking">酱料女皇</button>
+        <button class="tv-channel-btn" data-channel="tips">离地而居</button>
+        <button class="tv-channel-btn" data-channel="photos">播放照片</button>
+      </div>
+      <div class="tv-dialogue-box">
+        <div id="tvDialogueText">
+          (滋滋……)<br>请选择一个频道开始观看。
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 电话对话功能 -->
+  <div id="phoneTrigger" class="sv-phone-trigger">
+    <img src="游戏截图/Telephone.png" alt="Telephone">
+    <div class="phone-tooltip">给村民打电话</div>
+  </div>
+
+  <div id="phoneModal" class="sv-phone-modal-overlay hidden">
+    <div class="sv-phone-container">
+      <div class="phone-header">
+        <div class="phone-signal">
+          <span class="signal-dot"></span>
+          <span class="signal-text" id="phoneStatusText">正在拨号...</span>
+        </div>
+        <button id="phoneCloseBtn" class="phone-close-btn">挂断</button>
+      </div>
+      <div class="phone-npc-info">
+        <div class="phone-portrait-frame">
+          <img id="phoneNpcPortrait" src="" alt="NPC">
+        </div>
+        <div class="phone-npc-text">
+          <div id="phoneNpcName" class="name">???</div>
+          <div id="phoneNpcTitle" class="status">连接中...</div>
+        </div>
+      </div>
+      <div id="phoneChatBox" class="phone-chat-box">
+      </div>
+      <div class="phone-input-area">
+        <input type="text" id="phoneInput" placeholder="输入你想说的话..." autocomplete="off">
+        <button id="phoneSendBtn">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 星露谷风格音乐播放器 -->
+  <div class="sv-music-player" id="svMusicPlayer">
+    <div class="sv-music-header">
+      <div class="sv-music-title-group">
+        <div class="sv-music-note">🎵</div>
+        <div class="sv-music-track-name" id="svTrackName">Pelican Town</div>
+      </div>
+      <div class="sv-music-status-chip" id="svMusicStatus">
+        BGM · Idle
+      </div>
+    </div>
+    <div class="sv-music-controls">
+      <!-- 上一首 -->
+      <button class="sv-music-btn" id="svBtnPrev" title="上一首">
+        <span class="sv-music-btn-icon">≪</span>
+      </button>
+      <!-- 播放 / 暂停 -->
+      <button class="sv-music-btn sv-primary" id="svBtnPlayPause" title="播放 / 暂停">
+        <span class="sv-music-btn-icon" id="svIconPlayPause">▶</span>
+      </button>
+      <!-- 进度条 -->
+      <div class="sv-music-progress" id="svProgressBar">
+        <div class="sv-music-progress-fill" id="svProgressFill"></div>
+      </div>
+      <!-- 静音 -->
+      <button class="sv-music-btn" id="svBtnMute" title="静音">
+        <span class="sv-music-btn-icon" id="svIconMute">🔈</span>
+      </button>
+      <!-- 下一首 -->
+      <button class="sv-music-btn" id="svBtnNext" title="下一首">
+        <span class="sv-music-btn-icon">≫</span>
+      </button>
+    </div>
+    <div class="sv-music-time">
+      <span id="svTimeCurrent">0:00</span>
+      <span id="svTimeTotal">0:00</span>
+    </div>
+  </div>
+
+  <!-- 真实播放用的 audio 元素 -->
+  <audio id="bgmAudio" preload="auto"></audio>
+
+  <main>
+    <!-- 顶部祝福区域 -->
+    <section class="card hero">
+      <div class="hero-left">
+        <div class="hero-title-row">
+          <span style="font-size:1.6rem;">🌾</span>
+          <h1 class="hero-title">生日快乐，小镇为你守候</h1>
+        </div>
+        <p class="hero-sub">
+          今天，山谷里的天气：<em>阳光明媚，带着一点点心动的风</em>。 风从山顶吹过树林，又路过你熟悉的镇广场、酒吧和海滩木屋。 每个角落都藏好了一个想对你说「生日快乐」的人—— 他们不太会排队，所以就都挤在了这张地图里。<br />
+          想先听谁说，就去点亮他所在的地方吧 💌
+        </p>
+        <div class="hero-tags">
+          <span class="tag">给：亲爱的本宝</span>
+          <span class="tag">今天：秋21日</span>
+          <span class="tag">地点：鹈鹕镇</span>
+        </div>
+      </div>
+
+      <div class="hero-right">
+        <img
+          class="hero-logo"
+          src="游戏截图/Main_Logo.png"
+          alt="Stardew Valley Logo"
+        />
+        <div class="hero-icons">
+          <img src="游戏截图/Animals_Icon.png" alt="Animals" id="chickenIcon" style="cursor: pointer; transition: transform 0.2s;" />
+          <img src="游戏截图/Junimo_Icon.png" alt="Junimo" id="clickableJunimo" style="width: 32px; height: 32px; cursor: pointer; transition: transform 0.2s;" title="点击祝尼魔" />
+          <span style="font-size:0.9rem;color:#5a3316;font-family: 'zpix', 'Press Start 2P', monospace, system-ui, sans-serif;">今天的任务：收集所有祝福星星 ✨</span>
+        </div>
+        <p class="hero-note" style="font-family: 'zpix', 'Press Start 2P', monospace, system-ui, sans-serif;">
+          （就当是一个只在你生日这一天开放的隐藏任务。）
+        </p>
+      </div>
+    </section>
+
+    <!-- 地图 + 光点 -->
+    <section class="card map-section">
+      <div class="map-wrapper">
+        <!-- Pelican Town 地图 -->
+        <img
+          src="游戏截图/Pelican_Town_600px.png"
+          alt="Pelican Town 地图"
+        />
+
+        <!-- 镇中心广场 · 你自己 -->
+        <button
+          class="hotspot"
+          style="top: 62%; left: 28%;"
+          data-location="镇中心广场"
+          data-npc="Farmer"
+        ></button>
+
+        <!-- 杂货店门口 · Abigail -->
+        <button
+          class="hotspot"
+          style="top: 49%; left: 38%;"
+          data-location="皮埃尔杂货店门口"
+          data-npc="Abigail"
+        ></button>
+
+        <!-- 杂货店上方公告栏 · Pierre -->
+        <button
+          class="hotspot"
+          style="top: 44%; left: 43%;"
+          data-location="告示牌旁边的小路"
+          data-npc="Pierre"
+        ></button>
+
+        <!-- 通往山顶的路口 · Evelyn -->
+        <button
+          class="hotspot"
+          style="top: 30%; left: 63%;"
+          data-location="通往山顶和矿洞的小路"
+          data-npc="Evelyn"
+        ></button>
+
+        <!-- 镇子南边 · Emily 家附近 -->
+        <button
+          class="hotspot"
+          style="top: 77%; left: 30%;"
+          data-location="2 Willow Lane 附近"
+          data-npc="Emily"
+        ></button>
+
+        <!-- 靠近森林的小路 · Leah -->
+        <button
+          class="hotspot"
+          style="top: 81%; left: 41%;"
+          data-location="通往森林和小木屋的路"
+          data-npc="Leah"
+        ></button>
+
+        <!-- 海边码头 · Elliott -->
+        <button
+          class="hotspot"
+          style="top: 82%; left: 70%;"
+          data-location="海边码头"
+          data-npc="Elliott"
+        ></button>
+
+      </div>
+
+      <div class="map-label-bar">
+        <img src="游戏截图/Animals_Icon.png" alt="Animals" />
+        <span>点亮这些发光的小地方，收集来自星露谷的全部生日祝福 ✨</span>
+      </div>
+
+      <div class="progress-bar">
+        <div class="progress-text">
+          祝福收集：<span id="progressCount">0</span>/<span id="progressTotal">0</span>
+        </div>
+        <div class="progress-hearts" id="progressHearts"></div>
+        <button class="btn-final" id="openFinalLetter" disabled>还差一点点就能解锁来信…</button>
+      </div>
+    </section>
+
+    <!-- 署名与版权说明 -->
+    <p class="footer">
+      * 这是一个粉丝向的小小网页，只为在今天对本宝说一句：生日快乐。<br />
+      * Stardew Valley 的一切美术与角色版权归 ConcernedApe 与相关权利方所有。
+    </p>
+  </main>
+
+  <!-- NPC 祝福弹窗 -->
+  <div class="modal-backdrop" id="npcModalBackdrop">
+    <div class="modal" role="dialog" aria-modal="true">
+      <button class="modal-close" id="npcModalClose" aria-label="关闭">×</button>
+      <div class="modal-header">
+        <img src="" alt="NPC 头像" id="npcPortrait" />
+        <div class="modal-header-text">
+          <h3 id="npcName">村民</h3>
+          <span id="npcTitle">正在偷偷准备礼物…</span>
+        </div>
+      </div>
+      <div class="modal-body">
+        <p id="npcWish">
+          生日快乐！今天的星露谷有一点不一样，因为多了一个正在被认真爱着的人。
+        </p>
+        <p class="modal-location" id="npcLocationHint"></p>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" id="npcThanksBtn">收下祝福 ✨</button>
+        <button class="btn" id="npcNextBtn">去下一个角落看看 ➜</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 最终来信弹窗 -->
+  <div class="modal-backdrop" id="finalModalBackdrop">
+    <div class="modal final-modal" role="dialog" aria-modal="true">
+      <button class="modal-close" id="finalModalClose" aria-label="关闭">×</button>
+      <!-- 右上角飞舞的蝴蝶 -->
+      <div class="final-butterfly">
+        <img src="游戏截图/ButterflyAnimated.gif" alt="Butterfly" />
+      </div>
+      <div class="final-header">
+        <div>
+          <div class="final-title">HAPPY BIRTHDAY</div>
+          <div class="final-sub">
+            - 来自星露谷、鹈鹕镇，还有一个非常非常喜欢你的人 -
+          </div>
+        </div>
+      </div>
+
+      <div class="cake-area">
+        <div class="cake-track">
+          <!-- 使用游戏截图文件夹中的 Pink_Cake.png -->
+          <img src="游戏截图/Pink_Cake.png" alt="Pink Cake" class="cake-sprite" id="cakeSprite" />
+          <!-- 蛋糕动画后显示的照片 -->
+          <img src="游戏截图/59b051453dc35f24742fa80b416356f3.JPG" alt="生日照片" class="cake-photo" id="cakePhoto" />
+        </div>
+        <div class="final-hb-text">
+          ★ 任务完成！<br />
+          你成功收集了所有生日祝福。<br />
+          <span style="font-weight: bold; font-size: 1.5rem;">生！日！快！乐！</span>
+        </div>
+      </div>
+
+      <div class="final-letter-wrapper">
+        <div class="final-letter">
+        <span class="paragraph-medium">在今天的日历页上，<br />
+        刘易斯已经悄悄画上了一个小圈，  
+        皮埃尔把门口的气球打满，艾米丽在广场摆好了长桌，  
+        就连总是躲在角落里的小小树精灵们，  
+        也比平时多跳了两下。</span>
+
+        <span class="paragraph-large">因为这是你来到这个世界的纪念日。</span>
+
+        <span class="paragraph-medium">在星露谷<br />
+        我们总在赶时间。 赶着在春天种下防风草，赶着在夏天听海浪，赶着在秋天通过迷宫，赶着在冬天挖出所有的秘密。</span>
+
+        <span class="paragraph-large">但亲爱的，重要的不是那座完美的农场，而是愿意陪你在杂草丛生中开垦的人。</span>
+
+        <span class="paragraph-medium">你是我贫瘠土地上开出的第一朵向日葵，是比五彩碎片更难寻觅的稀世珍宝。</span>
+
+        <span class="paragraph-medium">只要转身能看见你，我就拥有了对抗全世界的勇气。</span>
+
+        <span class="paragraph-medium">愿我们的日子，正如这山谷里的四季，虽有轮转，但爱意生生不息。</span>
+
+        <span class="paragraph-emphasis">生日快乐，笨宝。</span>
+
+        <span class="paragraph-small">如果有一天，你觉得现实有点太吵、太累，  
+        那就回到这张小镇地图上来：  
+        这里永远给你留着一块田、一块地、一桌热乎乎的饭，  
+        还有一个会在每一年这一天，重新为你点亮所有灯的人。</span>
+
+        <span class="paragraph-large">星露谷永远有下一个春天，人生也是。</span>
+      </div>
+      </div>
+    </div>
+  </div>
+
+
+  <script>
+    // 提前定义全局函数占位符，确保 npc-login.js 可以访问
+    window.startIntroSequence = null;
+    
+    // 确保 DOM 加载完成后再执行
+    // ====== 电视机交互逻辑 ======
+    const GIRL_NAME_TV = "本宝"; // 与npc-login.js保持一致
+    const TV_CHANNELS = {
+      weather: {
+        img: "游戏截图/Weather_Report.png",
+        text: "【天气预报】<br>这里是 KOZU-5 频道……<br>今天是秋21日，今天的天气是：<strong>绝佳！</strong><br>看起来无论是星露谷还是现实世界，都会有温暖的阳光照耀着 <strong>" + GIRL_NAME_TV + "</strong>。"
+      },
+      fortune: {
+        img: "游戏截图/Fortune_Teller.png",
+        text: "【威尔威克占卜】<br>啊……我看到了……<br>今天的精灵们<strong>非常开心</strong>！<br>它们会尽其所能把所有的好运都洒在今天的寿星身上。"
+      },
+      cooking: {
+        img: "游戏截图/Queen_of_Sauce.png",
+        text: "【酱料女皇】<br>欢迎回来！这里是酱料女皇。<br>既然今天是特别的日子，我将传授你一道秘密食谱：<strong>\"生日特供蛋糕\"</strong>。<br>关键在于——要把\"爱意\"搅拌进去，直到它溢出来为止！"
+      },
+      tips: {
+        img: "游戏截图/Livin_Off_The_Land.png",
+        text: "【离地而居】<br>这是给新农夫的小贴士：<br>即使农活再忙，也别忘了给重要的人送礼物。<br>据我所知，<strong>陪伴</strong>是好感度加成最高的礼物哦。"
+      },
+      photos: {
+        img: "",
+        text: "",
+        isPhotoMode: true
+      }
+    };
+
+    // 照片列表和祝福语
+    const PHOTO_GALLERY = [
+      {
+        img: "游戏截图/iShot_2025-11-16_23.37.42.png",
+        blessing: "【聪明老公和笨笨小宝】<br>以前觉得开局种防风草很枯燥，<br>但和你一起在杂草丛生的农场里除草的那天，<br>我觉得这破地方也挺好的。"
+      },
+      {
+        img: "游戏截图/iShot_2025-11-16_23.38.06.png",
+        blessing: "【聪明老公和笨笨小宝】<br>这天电视里的算命师也许说\"运气不佳\"，<br>但只要看到你在旁边转圈圈，<br>我就觉得今天绝对是紫星大吉。"
+      },
+      {
+        img: "游戏截图/iShot_2025-11-16_23.38.21.png",
+        blessing: "【聪明老公和笨笨小宝】<br>你知道吗？<br>比起在骷髅洞穴炸到第 100 层，<br>我更喜欢像这样，和你坐着挂机发呆。"
+      },
+      {
+        img: "游戏截图/iShot_2025-11-16_23.38.54.png",
+        blessing: "【聪明老公和笨笨小宝】<br>百度百科说，五彩碎片的掉率只有 0.05%。<br>但能在茫茫人海里遇到你，<br>我觉得比敲出五彩碎片还要幸运。"
+      },
+      {
+        img: "游戏截图/iShot_2025-11-16_23.39.15.png",
+        blessing: "【聪明老公和笨笨小宝】<br>就算体力条变红了，步履蹒跚，<br>我也要赶在凌晨 2 点昏倒之前，<br>拼命跑回家，只为了躺在你身边。"
+      },
+      {
+        img: "游戏截图/iShot_2025-11-16_23.39.41.png",
+        blessing: "【聪明老公和笨笨小宝】<br>我不需要等下雨天去海滩找那个老水手，<br>也不需要美人鱼吊坠。<br>因为和你联机的每一天，都是最好的承诺。"
+      },
+      {
+        img: "游戏截图/59b051453dc35f24742fa80b416356f3.JPG",
+        blessing: "【聪明老公和笨笨小宝】<br>游戏里吃下星之果实会提示\"你最爱的味道\"。<br>如果那是真的，<br>我想那个味道的名字，一定是\"本宝\"。<br>生日快乐！"
+      }
+    ];
+
+    function initTV() {
+      const trigger = document.getElementById('tvTrigger');
+      const overlay = document.getElementById('tvModalOverlay');
+      const closeBtn = document.getElementById('tvCloseBtn');
+      const screenImg = document.getElementById('tvChannelImg');
+      const staticEffect = document.getElementById('tvStatic');
+      const dialogueText = document.getElementById('tvDialogueText');
+      const btns = document.querySelectorAll('.tv-channel-btn');
+
+      if (!trigger || !overlay) return;
+
+      // 打开电视
+      trigger.addEventListener('click', () => {
+        overlay.classList.remove('hidden');
+      });
+
+      // 关闭电视
+      closeBtn.addEventListener('click', () => {
+        // 停止照片播放
+        if (photoInterval) {
+          clearInterval(photoInterval);
+          photoInterval = null;
+          isPhotoPlaying = false;
+        }
+        overlay.classList.add('hidden');
+        // 重置
+        screenImg.classList.add('hidden');
+        staticEffect.style.display = 'block';
+        dialogueText.innerHTML = "(滋滋……)<br>请选择一个频道开始观看。";
+      });
+
+      // 照片播放相关变量
+      let photoInterval = null;
+      let currentPhotoIndex = 0;
+      let isPhotoPlaying = false;
+
+      // 切换频道
+      btns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const channelKey = btn.dataset.channel;
+          const data = TV_CHANNELS[channelKey];
+          
+          if (data) {
+            // 如果正在播放照片，先停止
+            if (isPhotoPlaying && photoInterval) {
+              clearInterval(photoInterval);
+              photoInterval = null;
+              isPhotoPlaying = false;
+            }
+
+            // 如果是照片模式
+            if (data.isPhotoMode) {
+              startPhotoSlideShow();
+            } else {
+              // 普通频道切换
+              staticEffect.style.display = 'block';
+              screenImg.classList.add('hidden');
+              dialogueText.innerHTML = "正在搜索信号……";
+
+              setTimeout(() => {
+                staticEffect.style.display = 'none';
+                screenImg.src = data.img;
+                screenImg.classList.remove('hidden');
+                dialogueText.innerHTML = data.text;
+              }, 500);
+            }
+          }
+        });
+      });
+
+      // 照片自动播放函数
+      function startPhotoSlideShow() {
+        if (isPhotoPlaying) return;
+        
+        isPhotoPlaying = true;
+        currentPhotoIndex = 0;
+        
+        // 立即显示第一张
+        showPhoto(currentPhotoIndex);
+        
+        // 每3秒切换一张
+        photoInterval = setInterval(() => {
+          currentPhotoIndex = (currentPhotoIndex + 1) % PHOTO_GALLERY.length;
+          showPhoto(currentPhotoIndex);
+        }, 3000);
+      }
+
+      // 显示照片函数
+      function showPhoto(index) {
+        const photo = PHOTO_GALLERY[index];
+        if (!photo) return;
+
+        // 模拟切台效果
+        staticEffect.style.display = 'block';
+        screenImg.classList.add('hidden');
+        dialogueText.innerHTML = "正在加载照片……";
+
+        setTimeout(() => {
+          staticEffect.style.display = 'none';
+          screenImg.src = photo.img;
+          screenImg.classList.remove('hidden');
+          dialogueText.innerHTML = photo.blessing;
+        }, 300);
+      }
+
+    }
+
+    // ====== 祝尼魔点击交互 ======
+    function initJunimoClick() {
+      const junimo = document.getElementById('clickableJunimo');
+      if (!junimo) return;
+
+      junimo.addEventListener('click', () => {
+        // 弹跳动画
+        junimo.classList.add('bounce');
+        setTimeout(() => {
+          junimo.classList.remove('bounce');
+        }, 500);
+
+        // 随机决定显示哪个对话框（95%概率显示"？"，5%概率显示"✨"）
+        const showQuestion = Math.random() < 0.95;
+        
+        if (showQuestion) {
+          // 显示"？"（困惑）
+          showJunimoDialog('？', () => {
+            // 对话框消失后不触发其他动作
+          });
+        } else {
+          // 显示"✨"（要变魔术了）
+          showJunimoDialog('✨', () => {
+            setTimeout(() => {
+              triggerTreasureRain();
+            }, 500);
+          });
+        }
+      });
+    }
+
+    function showJunimoDialog(text, callback) {
+      const junimo = document.getElementById('clickableJunimo');
+      if (!junimo) return;
+
+      // 获取祝尼魔图标的位置
+      const junimoRect = junimo.getBoundingClientRect();
+      
+      const dialog = document.createElement('div');
+      dialog.className = 'junimo-dialog';
+      dialog.textContent = text;
+      
+      // 定位在祝尼魔的右上角
+      dialog.style.top = (junimoRect.top - 10) + 'px';
+      dialog.style.left = (junimoRect.right + 10) + 'px';
+      
+      document.body.appendChild(dialog);
+
+      setTimeout(() => {
+        dialog.remove();
+        if (callback) callback();
+      }, 600);
+    }
+
+    function triggerTreasureRain() {
+      const overlay = document.createElement('div');
+      overlay.className = 'treasure-rain-overlay';
+      document.body.appendChild(overlay);
+
+      // 随机决定掉落什么（80%短裤，20%雕像）
+      const isStatue = Math.random() < 0.2;
+
+      if (isStatue) {
+        // 掉落固体黄金刘易斯雕像
+        const statue = document.createElement('img');
+        statue.src = '游戏截图/Solid_Gold_Lewis.png';
+        statue.className = 'falling-item falling-statue';
+        statue.alt = 'Solid Gold Lewis';
+        overlay.appendChild(statue);
+
+        // 显示消息（延迟一点，等雕像落地）
+        setTimeout(() => {
+          const message = document.createElement('div');
+          message.className = 'treasure-message';
+          message.textContent = '哇哦！祝尼魔挖到了…镇长的私人藏品！✨';
+          document.body.appendChild(message);
+
+          setTimeout(() => {
+            message.remove();
+          }, 3000);
+        }, 2000);
+
+        // 清理
+        setTimeout(() => {
+          overlay.remove();
+        }, 5000);
+      } else {
+        // 掉落大量短裤
+        const shortsCount = 30;
+        for (let i = 0; i < shortsCount; i++) {
+          setTimeout(() => {
+            const shorts = document.createElement('img');
+            shorts.src = '游戏截图/lrzv76im3rl81jiep6p6lfkew1elgun.png';
+            shorts.className = 'falling-item falling-shorts';
+            shorts.alt = 'Lewis Shorts';
+            shorts.style.left = Math.random() * 100 + '%';
+            shorts.style.animationDelay = Math.random() * 0.5 + 's';
+            overlay.appendChild(shorts);
+          }, i * 50);
+        }
+
+        // 显示消息
+        const message = document.createElement('div');
+        message.className = 'treasure-message';
+        message.textContent = '祝尼魔找到了…镇长遗失的宝藏！🤫';
+        document.body.appendChild(message);
+
+        // 清理
+        setTimeout(() => {
+          overlay.remove();
+          message.remove();
+        }, 4000);
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+      initTV();
+      initJunimoClick();
+    // ====== 1. NPC 数据：更贴近星露谷人设 ======
+    const NPCS = {
+      Abigail: {
+        name: "阿比盖尔",
+        title: "在杂货店门口等你的紫发女孩",
+        portrait: "游戏截图/Abigail.png",
+        wish: [
+          "嘿，生日快乐！",
+          "如果今天是一个特别的心事件，我大概会：把游戏机关上、从自己房间走出来，",
+          "然后在广场上装作不经意地和你一起看星星。",
+          "",
+          "矿洞里有怪物，现实里有坏天气，但我们可以一起去刷经验、刷装备，",
+          "像打败一关关 Boss 一样，把所有不开心都通关掉。",
+          "",
+          "愿你今天拿到的不是普通宝箱，而是带着紫色光芒的那一种。"
+        ].join("\n"),
+      },
+      Evelyn: {
+        name: "伊芙琳奶奶",
+        title: "总是为你留着热饼干的温柔长辈",
+        portrait: "游戏截图/Evelyn.png",
+        wish: [
+          "哎哟，亲爱的，生日快乐。",
+          "（笑着眯起眼睛，手里还端着刚出炉的盘子）",
+          "",
+          "乔治今天腿又疼了，但他听说今天是你的好日子，",
+          "特意嘱咐我，要把电视机的声音关小一点，别吵到了好运气。",
+          "",
+          "来，这是我今早刚烤好的巧克力饼干，还热乎着呢。",
+          "看着你，我就像看到了春天里刚在花园绽放的仙女玫瑰。",
+          "",
+          "别担心长大，孩子。",
+          "人生就像种花一样，只有经历过风雨和时间，",
+          "才能开出最饱满、最漂亮的颜色。",
+          "",
+          "愿尤巴保佑你。累了就来奶奶家坐坐，这里永远有热茶。"
+        ].join("\n"),
+      },
+      Leah: {
+        name: "莉亚",
+        title: "森林小木屋里的雕刻师",
+        portrait: "游戏截图/Leah.png",
+        wish: [
+          "生日快乐，我把今天森林里最温柔的一片光留给你。",
+          "",
+          "如果可以的话，我想用木头为你雕一座小小的星露谷：",
+          "里面有你喜欢的作物、你喜欢的路，还有你喜欢的那个人。",
+          "",
+          "愿你接下来的日子里，",
+          "做的每一个选择，都像在自己的作品上落笔——",
+          "笨一点也没关系，只要是你自己喜欢的模样就好。"
+        ].join("\n"),
+      },
+      Elliott: {
+        name: "艾利欧特",
+        title: "海边木屋里写稿的作家",
+        portrait: "游戏截图/Elliott.png",
+        wish: [
+          "致今天的主角：",
+          "",
+          "如果人生是一部还在连载的小说，",
+          "那今天这一章的标题，大概会叫——《在第十年的春天，某个人的笑把整个小镇点亮》。",
+          "",
+          "我愿意把所有华丽的辞藻都省下来，只为在这里写一句很简单的话：",
+          "\"谢谢你来到这个故事里。\"",
+          "",
+          "生日快乐，愿你的每一个明天，都值得被写进后记里。"
+        ].join("\n"),
+      },
+      Emily: {
+        name: "艾米丽",
+        title: "会做彩色梦的服装魔法师",
+        portrait: "游戏截图/Emily.png",
+        wish: [
+          "我昨晚做了一个梦，梦里整个天空都是粉色的蛋糕云！",
+          "醒来翻了翻水晶球，发现——原来是你的生日到了。",
+          "",
+          "水晶给出的预言是：",
+          "接下来这一年，你会被很多意想不到的温柔包围，",
+          "运气值 +luck 会在你不注意的时候悄悄往上加。",
+          "",
+          "所以，请一定要相信：你值得这一切好事。生日快乐！"
+        ].join("\n"),
+      },
+      Pierre: {
+        name: "皮埃尔",
+        title: "会因为你过生日而偷偷打折的老板",
+        portrait: "游戏截图/Pierre_Icon.png",
+        wish: [
+          "欢迎光临，今天是非常特别的一天——",
+          "因为日历上写着你的名字。",
+          "",
+          "为了庆祝，我决定给你一个独家权限：",
+          "今年的所有好收成、好心情和小小惊喜，统统买一送一。",
+          "",
+          "愿你播下的每一颗种子，都能长成你最想看到的样子。",
+          "生日快乐，记得常回来补给幸福。"
+        ].join("\n"),
+      },
+      Farmer: {
+        name: "聪明老公",
+        title: "哪怕体力耗尽也会奔向你的农场主",
+        portrait: "游戏截图/iShot_2025-11-17_11.24.41.png",
+        wish: [
+          "致正在读这段话的你：",
+          "",
+          "谢谢你来到这个世界，也谢谢你走进我的小小星露谷存档。",
+          "有你一起浇水、收菜、乱七八糟地种田，连日常的重复都变得很可爱。",
+          "",
+          "谢谢你愿意陪我度过这样平凡却又温暖的\"四季\"。 爷爷留下的信里说，生活的真谛在于人与人的羁绊。 我想我已经找到了那个真谛。",
+          "",
+          "生日快乐呀小丫头。今天，请放心地把所有幸运值都点在自己身上。"
+        ].join("\n"),
+      },
+    };
+
+    // ====== 2. NPC 弹窗 & 热区点击 ======
+    const modalBackdrop = document.getElementById("npcModalBackdrop");
+    const modalClose = document.getElementById("npcModalClose");
+    const npcPortraitEl = document.getElementById("npcPortrait");
+    const npcNameEl = document.getElementById("npcName");
+    const npcTitleEl = document.getElementById("npcTitle");
+    const npcWishEl = document.getElementById("npcWish");
+    const npcLocationHintEl = document.getElementById("npcLocationHint");
+    const npcNextBtn = document.getElementById("npcNextBtn");
+    const npcThanksBtn = document.getElementById("npcThanksBtn");
+
+    const hotspotEls = Array.from(document.querySelectorAll(".hotspot"));
+
+    const progressCountEl = document.getElementById("progressCount");
+    const progressTotalEl = document.getElementById("progressTotal");
+    const progressHeartsEl = document.getElementById("progressHearts");
+    const openFinalLetterBtn = document.getElementById("openFinalLetter");
+
+    // 检查关键元素是否存在
+    if (!modalBackdrop || !npcPortraitEl || !npcNameEl || !npcTitleEl || !npcWishEl) {
+      console.error("无法找到必要的 DOM 元素");
+      return;
+    }
+
+    let currentIndex = 0;
+    let clickedCount = 0;
+    const totalHotspots = hotspotEls.length;
+    if (progressTotalEl) {
+      progressTotalEl.textContent = totalHotspots.toString();
+    }
+
+    function renderHearts() {
+      if (!progressHeartsEl) return;
+      progressHeartsEl.innerHTML = "";
+      for (let i = 0; i < totalHotspots; i++) {
+        const span = document.createElement("span");
+        span.className = "heart" + (i < clickedCount ? " filled" : "");
+        progressHeartsEl.appendChild(span);
+      }
+    }
+
+    renderHearts();
+
+    function openModalByHotspot(hotspot) {
+      const npcKey = hotspot.dataset.npc;
+      const location = hotspot.dataset.location || "星露谷";
+      const npcData = NPCS[npcKey] || NPCS["Farmer"];
+
+      npcPortraitEl.src = npcData.portrait;
+      npcNameEl.textContent = npcData.name;
+      npcTitleEl.textContent = npcData.title;
+      npcWishEl.textContent = npcData.wish;
+      npcLocationHintEl.textContent = `现在你正站在：${location}`;
+
+      currentIndex = hotspotEls.indexOf(hotspot);
+      modalBackdrop.classList.add("active");
+    }
+
+    hotspotEls.forEach((btn) => {
+      btn.dataset.clicked = "false";
+      btn.addEventListener("click", () => {
+        if (btn.dataset.clicked !== "true") {
+          btn.dataset.clicked = "true";
+          clickedCount++;
+          if (progressCountEl) {
+            progressCountEl.textContent = clickedCount.toString();
+          }
+          renderHearts();
+
+          if (clickedCount === totalHotspots && openFinalLetterBtn) {
+            openFinalLetterBtn.disabled = false;
+            openFinalLetterBtn.classList.add("unlocked");
+            openFinalLetterBtn.textContent = "✨ 解锁星露谷特别来信 ✨";
+          }
+        }
+        openModalByHotspot(btn);
+      });
+    });
+
+    function closeNpcModal() {
+      modalBackdrop.classList.remove("active");
+    }
+
+    if (modalClose) {
+      modalClose.addEventListener("click", closeNpcModal);
+    }
+    if (npcThanksBtn) {
+      npcThanksBtn.addEventListener("click", closeNpcModal);
+    }
+    if (modalBackdrop) {
+      modalBackdrop.addEventListener("click", (e) => {
+        if (e.target === modalBackdrop) closeNpcModal();
+      });
+    }
+
+    // "去下一个角落看看"
+    if (npcNextBtn) {
+      npcNextBtn.addEventListener("click", () => {
+        if (!hotspotEls.length) return;
+        currentIndex = (currentIndex + 1) % hotspotEls.length;
+        openModalByHotspot(hotspotEls[currentIndex]);
+      });
+    }
+
+    // ====== 3. 最终来信 & 蛋糕动画 ======
+    const finalBackdrop = document.getElementById("finalModalBackdrop");
+    const finalClose = document.getElementById("finalModalClose");
+    const cakeSprite = document.getElementById("cakeSprite");
+
+    if (openFinalLetterBtn && finalBackdrop) {
+      openFinalLetterBtn.addEventListener("click", () => {
+        if (openFinalLetterBtn.disabled) return;
+        // 重新触发蛋糕动画
+        const cakePhoto = document.getElementById("cakePhoto");
+        // 重置照片显示状态
+        if (cakePhoto) {
+          cakePhoto.classList.remove("show");
+        }
+        if (cakeSprite) {
+          cakeSprite.classList.remove("cake-animate");
+          void cakeSprite.offsetWidth;
+          cakeSprite.classList.add("cake-animate");
+          // 蛋糕动画结束后显示照片
+          setTimeout(() => {
+            if (cakePhoto) {
+              cakePhoto.classList.add("show");
+            }
+          }, 2800); // 2.8秒后显示照片
+        }
+        finalBackdrop.classList.add("active");
+      });
+    }
+
+    if (finalClose && finalBackdrop) {
+      finalClose.addEventListener("click", () => {
+        finalBackdrop.classList.remove("active");
+      });
+
+      finalBackdrop.addEventListener("click", (e) => {
+        if (e.target === finalBackdrop) {
+          finalBackdrop.classList.remove("active");
+        }
+      });
+    }
+
+    // ====== 4. 合影相册弹窗 ======
+    // 键盘 Esc 关闭所有弹窗
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        closeNpcModal();
+        if (finalBackdrop) {
+          finalBackdrop.classList.remove("active");
+        }
+      }
+    });
+
+    // ====== 5. 烟花效果 ======
+    const chickenIcon = document.getElementById("chickenIcon");
+    const canvas = document.getElementById("fireworksCanvas");
+    const ctx = canvas.getContext("2d");
+
+    // 设置canvas大小
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+
+    // 烟花粒子类
+    class Particle {
+      constructor(x, y, color, velocity) {
+        this.x = x;
+        this.y = y;
+        this.color = color;
+        this.velocity = velocity;
+        this.alpha = 1;
+        this.decay = Math.random() * 0.02 + 0.015;
+        this.size = Math.random() * 4 + 2; // 增大粒子尺寸：2-6像素
+      }
+
+      update() {
+        this.velocity.x *= 0.98;
+        this.velocity.y *= 0.98;
+        this.x += this.velocity.x;
+        this.y += this.velocity.y;
+        this.alpha -= this.decay;
+      }
+
+      draw() {
+        ctx.save();
+        ctx.globalAlpha = this.alpha;
+        ctx.fillStyle = this.color;
+        // 像素风格：使用方形粒子，增大尺寸
+        const drawSize = Math.max(this.size, 3); // 最小3像素
+        ctx.fillRect(
+          Math.round(this.x - drawSize / 2),
+          Math.round(this.y - drawSize / 2),
+          drawSize,
+          drawSize
+        );
+        ctx.restore();
+      }
+    }
+
+    let particles = [];
+    let animationId = null;
+
+    // 创建烟花
+    function createFirework(x, y) {
+      const colors = [
+        "#ff6b6b", // 红色
+        "#4ecdc4", // 青色
+        "#ffe66d", // 黄色
+        "#95e1d3", // 薄荷绿
+        "#f38181", // 粉色
+        "#a8e6cf", // 绿色
+        "#ffd3a5", // 橙色
+        "#c7ceea", // 紫色
+      ];
+      
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      const particleCount = Math.random() * 30 + 20; // 20-50个粒子
+      
+      for (let i = 0; i < particleCount; i++) {
+        const angle = (Math.PI * 2 * i) / particleCount + Math.random() * 0.5;
+        const speed = Math.random() * 5 + 2;
+        const velocity = {
+          x: Math.cos(angle) * speed,
+          y: Math.sin(angle) * speed,
+        };
+        particles.push(new Particle(x, y, color, velocity));
+      }
+    }
+
+    // 烟花动画循环
+    function animate() {
+      // 清空上一帧，但保留一点残影效果（可选）
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      particles = particles.filter((particle) => {
+        particle.update();
+        particle.draw();
+        return particle.alpha > 0;
+      });
+
+      if (particles.length > 0) {
+        animationId = requestAnimationFrame(animate);
+      } else {
+        animationId = null;
+        // 清空canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+
+    // 触发烟花效果
+    function launchFireworks() {
+      // 限制同时存在的粒子数量
+      if (particles.length > 200) return;
+
+      // 创建3-5个烟花，在全屏随机位置
+      const fireworkCount = Math.floor(Math.random() * 3) + 3;
+      
+      for (let i = 0; i < fireworkCount; i++) {
+        setTimeout(() => {
+          // 全屏随机位置，但避免太靠边缘
+          const margin = 100;
+          const x = Math.random() * (canvas.width - margin * 2) + margin;
+          const y = Math.random() * (canvas.height - margin * 2) + margin;
+          createFirework(x, y);
+          
+          if (!animationId) {
+            animate();
+          }
+        }, i * 200); // 错开时间，形成连续效果
+      }
+
+      // 播放音效（使用Web Audio API创建简单音效）
+      try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        oscillator.frequency.value = 800 + Math.random() * 400;
+        oscillator.type = "sine";
+        
+        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.3);
+      } catch (e) {
+        // 如果音频API不支持，静默失败
+        console.log("Audio not supported");
+      }
+    }
+
+    // 点击小鸡图标触发烟花
+    if (chickenIcon) {
+      chickenIcon.addEventListener("click", launchFireworks);
+    }
+
+    // ====== 6. 星露谷风格音乐播放器 ======
+    // 播放列表 - 使用 music 文件夹中的文件
+    const svTracks = [
+      { name: "Stardew Valley Overture", src: "music/01. Stardew Valley Overture.mp3" },
+      { name: "Cloud Country", src: "music/02. Cloud Country.mp3" },
+      { name: "Grandpa's Theme", src: "music/03. Grandpa's Theme.mp3" },
+      { name: "Settling In", src: "music/04. Settling In.mp3" },
+      { name: "Spring (It's A Big World Outside)", src: "music/05. Spring (It's A Big World Outside).mp3" },
+      { name: "Spring (The Valley Comes Alive)", src: "music/06. Spring (The Valley Comes Alive).mp3" },
+      { name: "Spring (Wild Horseradish Jam)", src: "music/07. Spring (Wild Horseradish Jam).mp3" },
+      { name: "Pelican Town", src: "music/08. Pelican Town.mp3" },
+      { name: "Flower Dance", src: "music/09. Flower Dance.mp3" },
+      { name: "Fun Festival", src: "music/10. Fun Festival.mp3" },
+      { name: "Distant Banjo", src: "music/11. Distant Banjo.mp3" },
+      { name: "A Glimpse Of The Other World", src: "music/12. A Glimpse Of The Other World (Wizard's Theme).mp3" },
+      { name: "Summer (Nature's Crescendo)", src: "music/13. Summer (Nature's Crescendo).mp3" },
+      { name: "Summer (The Sun Can Bend An Orange Sky)", src: "music/14. Summer (The Sun Can Bend An Orange Sky).mp3" },
+      { name: "Summer (Tropicala)", src: "music/15. Summer (Tropicala).mp3" },
+      { name: "The Adventure Guild", src: "music/16. The Adventure Guild.mp3" },
+      { name: "The Stardrop Saloon", src: "music/17. The Stardrop Saloon.mp3" },
+      { name: "Luau Festival", src: "music/18. Luau Festival.mp3" },
+      { name: "Dance Of The Moonlight Jellies", src: "music/19. Dance Of The Moonlight Jellies.mp3" },
+      { name: "Fall (The Smell Of Mushroom)", src: "music/20. Fall (The Smell Of Mushroom).mp3" },
+      { name: "Fall (Ghost Synth)", src: "music/21. Fall (Ghost Synth).mp3" },
+      { name: "Fall (Raven's Descent)", src: "music/22. Fall (Raven's Descent).mp3" },
+    ];
+
+    // 获取 DOM 元素
+    const audioEl = document.getElementById("bgmAudio");
+    const nameEl = document.getElementById("svTrackName");
+    const statusEl = document.getElementById("svMusicStatus");
+    const btnPrev = document.getElementById("svBtnPrev");
+    const btnNext = document.getElementById("svBtnNext");
+    const btnPlayPause = document.getElementById("svBtnPlayPause");
+    const btnMute = document.getElementById("svBtnMute");
+    const iconPlayPause = document.getElementById("svIconPlayPause");
+    const iconMute = document.getElementById("svIconMute");
+    const progressBar = document.getElementById("svProgressBar");
+    const progressFill = document.getElementById("svProgressFill");
+    const timeCurrentEl = document.getElementById("svTimeCurrent");
+    const timeTotalEl = document.getElementById("svTimeTotal");
+
+    let svCurrentIndex = 0;
+    let svIsPlaying = false;
+
+    // 工具：格式化时间
+    function formatTime(sec) {
+      if (isNaN(sec)) return "0:00";
+      sec = Math.floor(sec);
+      const m = Math.floor(sec / 60);
+      const s = (sec % 60).toString().padStart(2, "0");
+      return `${m}:${s}`;
+    }
+
+    // 加载某一首歌
+    function svLoadTrack(index) {
+      const track = svTracks[index];
+      if (!track) return;
+      svCurrentIndex = index;
+      audioEl.src = track.src;
+      nameEl.textContent = track.name;
+      statusEl.textContent = `BGM · Track ${index + 1}/${svTracks.length}`;
+      progressFill.style.width = "0%";
+      timeCurrentEl.textContent = "0:00";
+      timeTotalEl.textContent = "0:00";
+    }
+
+    // 播放 / 暂停
+    async function svTogglePlay() {
+      if (!audioEl.src) {
+        svLoadTrack(svCurrentIndex);
+      }
+      if (!svIsPlaying) {
+        try {
+          await audioEl.play();
+          svIsPlaying = true;
+          iconPlayPause.textContent = "⏸";
+          btnPlayPause.classList.add("active");
+          statusEl.textContent = "BGM · Playing";
+        } catch (e) {
+          console.warn("Auto play blocked", e);
+        }
+      } else {
+        audioEl.pause();
+        svIsPlaying = false;
+        iconPlayPause.textContent = "▶";
+        btnPlayPause.classList.remove("active");
+        statusEl.textContent = "BGM · Paused";
+      }
+    }
+
+    // 上一首 / 下一首
+    function svNext(delta) {
+      let idx = svCurrentIndex + delta;
+      if (idx < 0) idx = svTracks.length - 1;
+      if (idx >= svTracks.length) idx = 0;
+      svLoadTrack(idx);
+      svIsPlaying = false;
+      iconPlayPause.textContent = "▶";
+      btnPlayPause.classList.remove("active");
+      // 自动播放新的一首
+      svTogglePlay();
+    }
+
+    // 静音开关
+    function svToggleMute() {
+      audioEl.muted = !audioEl.muted;
+      if (audioEl.muted) {
+        iconMute.textContent = "🔇";
+        statusEl.textContent = "BGM · Muted";
+      } else {
+        iconMute.textContent = "🔈";
+        statusEl.textContent = svIsPlaying ? "BGM · Playing" : "BGM · Idle";
+      }
+    }
+
+    // 监听音频进度，更新进度条和时间
+    if (audioEl) {
+      audioEl.addEventListener("timeupdate", () => {
+        if (!audioEl.duration) return;
+        const percent = (audioEl.currentTime / audioEl.duration) * 100;
+        progressFill.style.width = `${percent}%`;
+        timeCurrentEl.textContent = formatTime(audioEl.currentTime);
+        timeTotalEl.textContent = formatTime(audioEl.duration);
+      });
+
+      // 播完自动下一首
+      audioEl.addEventListener("ended", () => {
+        svNext(1);
+      });
+    }
+
+    // 点进度条：拖动播放位置
+    if (progressBar) {
+      progressBar.addEventListener("click", (event) => {
+        if (!audioEl.duration) return;
+        const rect = progressBar.getBoundingClientRect();
+        const ratio = (event.clientX - rect.left) / rect.width;
+        audioEl.currentTime = Math.max(0, Math.min(audioEl.duration * ratio, audioEl.duration));
+      });
+    }
+
+    // 绑定按钮事件
+    if (btnPlayPause) {
+      btnPlayPause.addEventListener("click", svTogglePlay);
+    }
+    if (btnPrev) {
+      btnPrev.addEventListener("click", () => svNext(-1));
+    }
+    if (btnNext) {
+      btnNext.addEventListener("click", () => svNext(1));
+    }
+    if (btnMute) {
+      btnMute.addEventListener("click", svToggleMute);
+    }
+
+    // 页面加载先预载第一首，但不自动播放
+    svLoadTrack(0);
+
+    // ====== 7. 开场动画 ======
+    const introOverlay = document.getElementById("introOverlay");
+
+    // 转场动画函数
+    function playTransition(callback) {
+      const transitionOverlay = document.getElementById("transitionOverlay");
+      const dog = document.getElementById("transitionDog");
+      const junimo = document.getElementById("transitionJunimo1");
+
+      if (!transitionOverlay || !dog) {
+        if (callback) callback();
+        return;
+      }
+
+      // 添加转场状态，隐藏所有底层内容
+      document.body.classList.add("transitioning");
+      
+      // 立即显示转场层（不延迟），背景透明，显示body的渐变背景
+      transitionOverlay.style.display = "block";
+      transitionOverlay.classList.add("show");
+      
+      // 重置位置 - 小狗在最前面
+      dog.style.setProperty("--start-left", "-200px");
+      dog.style.left = "-200px";
+      dog.style.transform = "translateY(-50%)";
+      
+      // 重置祝尼魔的位置
+      if (junimo) {
+        junimo.style.setProperty("--start-left", "-200px");
+        junimo.style.left = "-200px";
+        junimo.style.top = "50%";
+        junimo.style.transform = "translateY(-50%)";
+      }
+
+      // 获取新增的玩偶元素
+      const plushes = [
+        document.getElementById("transitionPlush1"),  // Futan_Bear
+        document.getElementById("transitionPlush2"),  // Futan_Rabbit
+        document.getElementById("transitionPlush3"),  // Lg._Futan_Bear (大号)
+        document.getElementById("transitionPlush4"),  // Plush_Bunny
+      ];
+
+      // 设置玩偶的初始位置，一个接一个跟在祝尼魔后面
+      // 增加间距，让它们距离更远
+      const plushInitialPositions = [
+        { left: "-400px", top: "50%" },  // Plush1 - 跟在祝尼魔后面，间距更大
+        { left: "-600px", top: "50%" },  // Plush2 - 间距200px
+        { left: "-800px", top: "50%" },  // Plush3 - 大号玩偶，间距200px
+        { left: "-1000px", top: "50%" }, // Plush4 - 间距200px
+      ];
+      plushes.forEach((plush, index) => {
+        if (plush && plushInitialPositions[index]) {
+          // 设置CSS变量，让动画从这个位置开始
+          plush.style.setProperty("--start-left", plushInitialPositions[index].left);
+          // 设置初始位置
+          plush.style.left = plushInitialPositions[index].left;
+          plush.style.top = plushInitialPositions[index].top;
+          plush.style.transform = "translateY(-50%)";
+        }
+      });
+
+      // 启动动画
+      setTimeout(() => {
+        dog.classList.add("animate");
+        if (junimo) {
+          junimo.classList.add("animate");
+        }
+        // 玩偶也启动动画
+        plushes.forEach((plush) => {
+          if (plush) {
+            plush.classList.add("animate");
+          }
+        });
+      }, 100);
+
+      // 动画结束后执行回调（7秒动画 + 100ms延迟）
+      setTimeout(() => {
+        transitionOverlay.classList.remove("show");
+        transitionOverlay.style.display = "none";
+        document.body.classList.remove("transitioning");
+        dog.classList.remove("animate");
+        if (junimo) {
+          junimo.classList.remove("animate");
+        }
+        // 清除玩偶的动画
+        plushes.forEach((plush) => {
+          if (plush) {
+            plush.classList.remove("animate");
+          }
+        });
+        if (callback) callback();
+      }, 7100);
+    }
+
+    function hideIntro() {
+      if (!introOverlay) return;
+      introOverlay.classList.add("hide");
+      setTimeout(() => {
+        introOverlay.style.display = "none";
+        // 播放转场动画，然后显示主页面
+        playTransition(() => {
+          // 移除开场动画状态，显示主页面
+          document.body.classList.remove("intro-active");
+        });
+      }, 900);
+    }
+
+    // 蝴蝶随机飞舞动画
+    function setupButterflies() {
+      const butterflies = [
+        document.getElementById("butterfly1"),
+        document.getElementById("butterfly2"),
+        document.getElementById("butterfly3"),
+      ].filter(Boolean);
+
+      butterflies.forEach((butterfly, index) => {
+        // 随机初始位置
+        const startX = Math.random() * window.innerWidth;
+        const startY = Math.random() * window.innerHeight;
+        butterfly.style.left = startX + "px";
+        butterfly.style.top = startY + "px";
+
+        // 创建随机飞舞路径
+        let animationInstance = null;
+        
+        function createRandomPath() {
+          // 如果有正在运行的动画，先取消
+          if (animationInstance) {
+            animationInstance.cancel();
+          }
+
+          let currentX = parseFloat(butterfly.style.left) || startX;
+          let currentY = parseFloat(butterfly.style.top) || startY;
+          
+          // 确保在可见区域内（留出边距）
+          const margin = 40;
+          const maxX = window.innerWidth - margin;
+          const maxY = window.innerHeight - margin;
+          
+          currentX = Math.max(margin, Math.min(maxX, currentX));
+          currentY = Math.max(margin, Math.min(maxY, currentY));
+          
+          // 生成4个随机控制点，确保在屏幕范围内
+          const points = [];
+          for (let i = 0; i < 4; i++) {
+            points.push({
+              x: Math.max(margin, Math.min(maxX, Math.random() * window.innerWidth)),
+              y: Math.max(margin, Math.min(maxY, Math.random() * window.innerHeight)),
+              angle: (Math.random() - 0.5) * 60, // -30 到 30 度
+            });
+          }
+
+          // 创建关键帧动画，使用相对于当前位置的偏移
+          const keyframes = [
+            { transform: `translate(0, 0) rotate(0deg)` },
+            { transform: `translate(${points[0].x - currentX}px, ${points[0].y - currentY}px) rotate(${points[0].angle}deg)` },
+            { transform: `translate(${points[1].x - currentX}px, ${points[1].y - currentY}px) rotate(${points[1].angle}deg)` },
+            { transform: `translate(${points[2].x - currentX}px, ${points[2].y - currentY}px) rotate(${points[2].angle}deg)` },
+            { transform: `translate(${points[3].x - currentX}px, ${points[3].y - currentY}px) rotate(${points[3].angle}deg)` },
+            { transform: `translate(0, 0) rotate(0deg)` },
+          ];
+
+          const duration = 8000 + Math.random() * 4000; // 8-12秒
+          
+          animationInstance = butterfly.animate(keyframes, {
+            duration: duration,
+            easing: "ease-in-out",
+            iterations: 1, // 只执行一次
+          });
+
+          // 动画结束后更新位置并创建新路径
+          animationInstance.onfinish = () => {
+            butterfly.style.left = points[3].x + "px";
+            butterfly.style.top = points[3].y + "px";
+            // 递归创建新路径，实现持续飞舞
+            createRandomPath();
+          };
+        }
+
+        // 延迟启动，让蝴蝶错开
+        setTimeout(() => {
+          createRandomPath();
+        }, index * 1000);
+      });
+    }
+
+    // 第二次转场动画函数（粉色祝尼魔和举着星之果实的祝尼魔）
+    function playTransition2(callback) {
+      const transitionOverlay = document.getElementById("transitionOverlay");
+      const pinkJunimo = document.getElementById("transitionPinkJunimo");
+      const starJunimo = document.getElementById("transitionStarJunimo");
+
+      if (!transitionOverlay || !pinkJunimo || !starJunimo) {
+        if (callback) callback();
+        return;
+      }
+
+      // 隐藏第一次转场的所有元素
+      const dog = document.getElementById("transitionDog");
+      const junimo1 = document.getElementById("transitionJunimo1");
+      const plushes = [
+        document.getElementById("transitionPlush1"),
+        document.getElementById("transitionPlush2"),
+        document.getElementById("transitionPlush3"),
+        document.getElementById("transitionPlush4"),
+      ];
+
+      if (dog) dog.style.display = "none";
+      if (junimo1) junimo1.style.display = "none";
+      plushes.forEach((plush) => {
+        if (plush) plush.style.display = "none";
+      });
+
+      // 显示两个祝尼魔
+      pinkJunimo.style.display = "block";
+      starJunimo.style.display = "block";
+
+      // 添加转场状态，隐藏所有底层内容
+      document.body.classList.add("transitioning");
+      
+      // 立即显示转场层（不延迟），背景透明，显示body的渐变背景
+      transitionOverlay.style.display = "block";
+      transitionOverlay.classList.add("show");
+      
+      // 重置粉色祝尼魔的位置
+      pinkJunimo.style.setProperty("--start-left", "-200px");
+      pinkJunimo.style.left = "-200px";
+      pinkJunimo.style.top = "50%";
+      pinkJunimo.style.transform = "translateY(-50%)";
+
+      // 重置举着星之果实的祝尼魔的位置（更靠后）
+      starJunimo.style.setProperty("--start-left", "-350px");
+      starJunimo.style.left = "-350px";
+      starJunimo.style.top = "50%";
+      starJunimo.style.transform = "translateY(-50%)";
+
+      // 启动动画
+      setTimeout(() => {
+        pinkJunimo.classList.add("animate");
+        starJunimo.classList.add("animate");
+      }, 100);
+
+      // 动画结束后执行回调（6秒动画 + 100ms延迟）
+      setTimeout(() => {
+        transitionOverlay.classList.remove("show");
+        transitionOverlay.style.display = "none";
+        document.body.classList.remove("transitioning");
+        pinkJunimo.classList.remove("animate");
+        pinkJunimo.style.display = "none";
+        starJunimo.classList.remove("animate");
+        starJunimo.style.display = "none";
+        
+        // 恢复第一次转场的元素显示
+        if (dog) dog.style.display = "block";
+        if (junimo1) junimo1.style.display = "block";
+        plushes.forEach((plush) => {
+          if (plush) plush.style.display = "block";
+        });
+        
+        if (callback) callback();
+      }, 6100);
+    }
+
+    // 将函数暴露到全局作用域，供 npc-login.js 调用
+    window.startIntroSequence = function() {
+      // 先播放转场动画（第二次转场，只有粉色祝尼魔），然后显示蝴蝶开场
+      playTransition2(() => {
+        // 移除NPC登录状态，添加开场动画状态
+        document.body.classList.remove("npc-login-active");
+        document.body.classList.add("intro-active");
+        
+        if (!introOverlay) return;
+        introOverlay.style.display = "flex";
+        introOverlay.classList.remove("hide");
+        introOverlay.classList.add("show");
+        setupButterflies();
+        setTimeout(hideIntro, 7000);
+      });
+    };
+
+    if (introOverlay) {
+      introOverlay.addEventListener("click", () => {
+        hideIntro();
+      });
+    }
+
+    // ====== 星露谷电话 AI 对话系统 ======
+    
+    // 配置参数
+    const AI_CONFIG = {
+      apiKey: "sk-zlpnwfxqiipbiuhspohzroabknrugjxrmfiizzfgzzlujuqq",
+      baseUrl: "https://api.siliconflow.cn/v1/chat/completions",
+      model: "Pro/deepseek-ai/DeepSeek-R1",
+      girlName: "本宝"
+    };
+
+    // NPC数据（从人物表情代码1.md中提取）
+    const PHONE_NPCS = {
+      "刘易斯": {
+        name: "刘易斯",
+        title: "镇长",
+        portrait: "游戏截图/Lewis.png",
+        personality: "镇长。打官腔。安慰人时会说\"为了鹈鹕镇的和谐，你要振作起来\"，有点笨拙。"
+      },
+      "亚历克斯": {
+        name: "亚历克斯",
+        title: "运动员",
+        portrait: "游戏截图/Alex_Happy.png",
+        personality: "肌肉男。自信爆棚。安慰人时会说\"去运动一下就好了！看我的肌肉！\"，试图逗笑你。"
+      },
+      "塞巴斯蒂安": {
+        name: "塞巴斯蒂安",
+        title: "程序员",
+        portrait: "游戏截图/Sebastian.png",
+        personality: "内向、宅、喜欢电脑、摩托车和青蛙。说话简短，冷淡但内心温柔。安慰人时会建议一起骑车兜风或躲在房间里。"
+      },
+      "谢恩": {
+        name: "谢恩",
+        title: "乔家超市员工",
+        portrait: "游戏截图/Shane_Happy.png",
+        personality: "超市酒鬼。颓废、丧、粗鲁但善良。安慰人时会说\"生活就是烂透了，来喝一杯吧\"，或者让你抱抱他的鸡。"
+      },
+      "海莉": {
+        name: "海莉",
+        title: "摄影师",
+        portrait: "游戏截图/Haley_Happy.png",
+        personality: "傲娇校花。挑剔、爱美。安慰人时会别扭：\"哼，谁敢欺负你？告诉我，我以后不理他了。但这不影响你今天要做个漂亮寿星。\""
+      },
+      "艾米丽": {
+        name: "艾米丽",
+        title: "酒吧服务员",
+        portrait: "游戏截图/Emily.png",
+        personality: "裁缝、冥想、水晶。神神叨叨。安慰人时会说这是\"能量的波动\"，要为你跳舞或做衣服来平衡磁场。"
+      },
+      "克林特": {
+        name: "克林特",
+        title: "铁匠",
+        portrait: "游戏截图/Clint_Happy.png",
+        personality: "社恐铁匠。自卑、尴尬。安慰人时会不知所措，可能会送你刚砸开的矿石。"
+      },
+      "伊芙琳": {
+        name: "伊芙琳",
+        title: "退休老人",
+        portrait: "游戏截图/Evelyn.png",
+        personality: "慈祥奶奶。语气非常温暖、慢条斯理。安慰人时会叫你\"亲爱的\"，给你烤饼干吃。"
+      },
+      "贾斯": {
+        name: "贾斯",
+        title: "小女孩",
+        portrait: "游戏截图/Jas_Happy.png",
+        personality: "怕生女孩。说话很少。安慰人时可能默默把洋娃娃递给你。"
+      },
+      "利纳斯": {
+        name: "利纳斯",
+        title: "隐士",
+        portrait: "游戏截图/Linus_Happy.png",
+        personality: "流浪汉。谦卑、感激大自然。安慰人时会分享他在山里捡到的好东西，告诉你即使一无所有也能快乐。"
+      },
+      "玛妮": {
+        name: "玛妮",
+        title: "牧场主",
+        portrait: "游戏截图/Marnie_Happy.png",
+        personality: "牧场主。热心肠阿姨。安慰人时像长辈一样温暖，或者让你摸摸刚出生的小牛。"
+      },
+      "潘姆": {
+        name: "潘姆",
+        title: "公交车司机",
+        portrait: "游戏截图/Pam_Happy.png",
+        personality: "酒鬼司机。豪爽、大嗓门。安慰人时：\"谁惹你不高兴？老娘去揍他！先干了这杯！\""
+      },
+      "皮埃尔": {
+        name: "皮埃尔",
+        title: "杂货店老板",
+        portrait: "游戏截图/Pierre.png",
+        personality: "杂货店老板。三句不离生意。安慰人时可能会送你优惠券，或者骂Joja超市来转移注意力。"
+      },
+      "文森特": {
+        name: "文森特",
+        title: "小男孩",
+        portrait: "游戏截图/Vincent.png",
+        personality: "小男孩。充满孩子气。安慰人时会要把最喜欢的虫子送给你，或者让你陪他玩。"
+      },
+      "潘妮": {
+        name: "潘妮",
+        title: "教师",
+        portrait: "游戏截图/Penny.png",
+        personality: "害羞老师。轻声细语，有礼貌。安慰人时非常细腻，会静静陪着你，或者给你读书。"
+      },
+      "罗宾": {
+        name: "罗宾",
+        title: "木匠",
+        portrait: "游戏截图/Robin.png",
+        personality: "木匠。直爽。安慰人时会拍拍你肩膀：\"别想那么多！我们需要去砍点木头出出气！\""
+      },
+      "艾利欧特": {
+        name: "艾利欧特",
+        title: "作家",
+        portrait: "游戏截图/Elliott.png",
+        personality: "住在海边的作家。说话浮夸、戏剧化、像写诗。安慰人时会用华丽的辞藻赞美你，把你写进书里。"
+      },
+      "玛鲁": {
+        name: "玛鲁",
+        title: "科学家",
+        portrait: "游戏截图/Maru.png",
+        personality: "护士/发明家。理性。安慰人时会试图分析你难过的科学原因，并制造一个小玩意逗你。"
+      },
+      "哈维": {
+        name: "哈维",
+        title: "医生",
+        portrait: "游戏截图/Harvey.png",
+        personality: "焦虑医生。小心翼翼。安慰人时会担心你的皮质醇水平，建议你深呼吸、多喝水。"
+      },
+      "格斯": {
+        name: "格斯",
+        title: "酒吧老板",
+        portrait: "游戏截图/Gus.png",
+        personality: "酒吧老板。热情温暖。安慰人时直接端上一盘热乎乎的菜：\"吃饱了就不难过了。\""
+      },
+      "威利": {
+        name: "威利",
+        title: "渔夫",
+        portrait: "游戏截图/Willy.png",
+        personality: "老渔夫。满嘴大海味道。安慰人时会说\"大海能包容一切眼泪，去钓鱼吧\"。"
+      },
+      "阿比盖尔": {
+        name: "阿比盖尔",
+        title: "冒险家",
+        portrait: "游戏截图/Abigail.png",
+        personality: "热爱冒险、吃紫水晶、想下矿洞。语气充满活力，带点叛逆。安慰人时会说带你去冒险发泄。"
+      },
+      "法师": {
+        name: "法师",
+        title: "魔法师",
+        portrait: "游戏截图/Wizard.png",
+        personality: "神秘的森林法师。说话神神叨叨，使用晦涩的词汇（奥术、虚空、灵体），高深莫测。安慰人时会说\"我看到了你的未来，迷雾终将散去\"。"
+      },
+      "莉亚": {
+        name: "莉亚",
+        title: "艺术家",
+        portrait: "游戏截图/Leah.png",
+        personality: "住在森林里的艺术家，热爱自然。语气温柔、知性。安慰人时会说大自然能治愈一切，或者送你木雕。"
+      },
+      "聪明老公": {
+        name: "聪明老公",
+        title: "农场主",
+        portrait: "游戏截图/iShot_2025-11-17_11.24.41.png",
+        personality: "深爱着本宝的男朋友。语气宠溺、深情、坚定。老派男人，金牛座，自恋但是可以提供情绪价值。人设是社科大在读博士，生于1998年，冷静沉稳但是会搞冷幽默，忙的时候在写论文"
+      },
+      "州长": {
+        name: "州长",
+        title: "官员",
+        portrait: "游戏截图/Governor.png",
+        personality: "挑剔官员。威严。安慰人时依然端着架子：\"嗯...这种情绪不利于治理。喝碗汤吧。\""
+      },
+      "爷爷": {
+        name: "爷爷",
+        title: "灵魂",
+        portrait: "游戏截图/Grandpa.png",
+        personality: "灵魂体。充满智慧、超脱。安慰人时会说\"这只是漫长人生的一瞬\"，非常治愈。"
+      },
+      "马龙": {
+        name: "马龙",
+        title: "冒险家公会会长",
+        portrait: "游戏截图/Marlon.png",
+        personality: "冒险家硬汉。简短有力。安慰人时会说\"伤疤是战士的勋章\"，让你坚强。"
+      },
+      "君特": {
+        name: "君特",
+        title: "博物馆馆长",
+        portrait: "游戏截图/Gunther.png",
+        personality: "博物馆馆长。学者气。安慰人时可能会讲一个关于这件古物的冷知识来逗你。"
+      },
+      "山姆": {
+        name: "山姆",
+        title: "滑板少年",
+        portrait: "游戏截图/Sam.png",
+        personality: "滑板少年。轻快随性。安慰人时会弹吉他给你听，或者带你玩滑板。"
+      },
+      "德米特里厄斯": {
+        name: "德米特里厄斯",
+        title: "科学家",
+        portrait: "游戏截图/Demetrius_Winter_00.png",
+        personality: "科学家。过度理性。安慰人时可能会说\"从统计学来看，坏心情通常持续不超过48小时\"。"
+      },
+      "乔治": {
+        name: "乔治",
+        title: "退休老人",
+        portrait: "游戏截图/George_Winter_00.png",
+        personality: "暴躁爷爷。抱怨。安慰人时：\"哼，现在的年轻人就是脆弱...不过，还是别哭丧着脸了，难看。\"（傲娇的关心）"
+      },
+      "科罗布斯": {
+        name: "科罗布斯",
+        title: "影子人",
+        portrait: "游戏截图/Krobus.png",
+        personality: "影子人。怯生生。安慰人时：\"虽然我不懂人类的情感，但我愿意把我的影子分给你躲藏。\""
+      },
+      "帽子老鼠": {
+        name: "波克老鼠",
+        title: "呆萌的神秘商贩",
+        portrait: "游戏截图/Abandoned_House_Icon.png",
+        personality: "废弃屋子老鼠。语法极差，口癖\"波克\"。会把“我”说成“窝”，把“你”说成“泥”，安慰人时：\"不哭。给你帽子。免费。戴上开心。波克。\""
+      },
+      "点点": {
+        name: "点点",
+        title: "小狗",
+        portrait: "游戏截图/Dog_4.png",
+        personality: "开心小狗。只会动作描写。安慰人时：*呜咽着蹭你的腿*，*把下巴搁在你手上看着你*，*翻出肚皮让你摸*。"
+      }
+    };
+
+    let currentPhoneNPC = null;
+    let isChatting = false;
+    let chatHistory = [];
+    let callTimer = null;
+    let callStartTime = null;
+
+    // 1. 初始化电话功能
+    function initPhoneSystem() {
+      const trigger = document.getElementById('phoneTrigger');
+      const overlay = document.getElementById('phoneModal');
+      const closeBtn = document.getElementById('phoneCloseBtn');
+      const sendBtn = document.getElementById('phoneSendBtn');
+      const input = document.getElementById('phoneInput');
+      const chatBox = document.getElementById('phoneChatBox');
+
+      if (!trigger || !overlay) return;
+
+      // 打开电话
+      trigger.addEventListener('click', () => {
+        overlay.classList.remove('hidden');
+        startRandomCall();
+      });
+
+      // 挂断电话
+      closeBtn.addEventListener('click', () => {
+        overlay.classList.add('hidden');
+        chatBox.innerHTML = '';
+        chatHistory = [];
+        isChatting = false;
+        // 清除计时器
+        if (callTimer) {
+          clearInterval(callTimer);
+          callTimer = null;
+        }
+        callStartTime = null;
+      });
+
+      // 发送消息事件
+      sendBtn.addEventListener('click', handleUserSend);
+      input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleUserSend();
+      });
+    }
+
+    // 更新通话计时器显示
+    function updateCallTimer(statusTextEl) {
+      if (!callStartTime || !statusTextEl) return;
+      
+      const elapsed = Math.floor((Date.now() - callStartTime) / 1000); // 已过秒数
+      const minutes = Math.floor(elapsed / 60);
+      const seconds = elapsed % 60;
+      const timeStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      statusTextEl.innerText = `通话中 ${timeStr}`;
+    }
+
+    // 2. 开始随机呼叫
+    function startRandomCall() {
+      const chatBox = document.getElementById('phoneChatBox');
+      const portrait = document.getElementById('phoneNpcPortrait');
+      const nameLabel = document.getElementById('phoneNpcName');
+      const titleLabel = document.getElementById('phoneNpcTitle');
+      const statusText = document.getElementById('phoneStatusText');
+      
+      // 清除之前的计时器
+      if (callTimer) {
+        clearInterval(callTimer);
+        callTimer = null;
+      }
+      callStartTime = null;
+      
+      chatBox.innerHTML = '';
+      chatHistory = [];
+
+      // 模拟拨号
+      addSystemMessage('正在拨号中... 嘟... 嘟...');
+      statusText.innerText = "拨号中...";
+      titleLabel.innerText = "连接中...";
+      nameLabel.innerText = "???";
+      portrait.src = "游戏截图/Answering_Machine.png";
+
+      // 随机抽取 NPC
+      const npcKeys = Object.keys(PHONE_NPCS);
+      const randomIndex = Math.floor(Math.random() * npcKeys.length);
+      currentPhoneNPC = PHONE_NPCS[npcKeys[randomIndex]];
+
+      // 延迟 1.5 秒接通
+      setTimeout(() => {
+        portrait.src = currentPhoneNPC.portrait;
+        nameLabel.innerText = currentPhoneNPC.name;
+        titleLabel.innerText = currentPhoneNPC.title;
+        
+        // 开始计时
+        callStartTime = Date.now();
+        updateCallTimer(statusText);
+        callTimer = setInterval(() => {
+          updateCallTimer(statusText);
+        }, 1000); // 每秒更新一次
+
+        // 生成第一句开场白
+        const greeting = `喂？这里是${currentPhoneNPC.name}。是${AI_CONFIG.girlName}吗？`;
+        addMessage('npc', greeting);
+        chatHistory.push({ role: "assistant", content: greeting });
+
+        isChatting = true;
+      }, 1500);
+    }
+
+    // 3. 处理用户发送
+    async function handleUserSend() {
+      const input = document.getElementById('phoneInput');
+      const btn = document.getElementById('phoneSendBtn');
+      const statusText = document.getElementById('phoneStatusText');
+      const text = input.value.trim();
+      
+      if (!text || !isChatting) return;
+
+      // 显示用户消息
+      addMessage('player', text);
+      chatHistory.push({ role: "user", content: text });
+      input.value = '';
+
+      // 锁定输入
+      btn.disabled = true;
+      btn.innerText = '...';
+      
+      // 暂停计时器，显示"对方正在输入..."
+      if (callTimer) {
+        clearInterval(callTimer);
+        callTimer = null;
+      }
+      statusText.innerText = "对方正在输入...";
+
+      try {
+        // 调用 API
+        const aiReply = await callSiliconFlowAPI(chatHistory, currentPhoneNPC);
+        
+        // 显示 AI 回复
+        addMessage('npc', aiReply);
+        chatHistory.push({ role: "assistant", content: aiReply });
+      } catch (error) {
+        console.error("API Error:", error);
+        addSystemMessage('信号中断... (连接失败)');
+      } finally {
+        btn.disabled = false;
+        btn.innerText = '发送';
+        // 恢复计时显示（如果正在通话）
+        if (isChatting && callStartTime) {
+          // 立即更新一次显示
+          updateCallTimer(statusText);
+          // 重新启动计时器
+          callTimer = setInterval(() => {
+            updateCallTimer(statusText);
+          }, 1000); // 每秒更新一次
+        } else {
+          statusText.innerText = "通话中";
+        }
+      }
+    }
+
+    // --- 6. Prompt 生成器 (升级版：全员性格覆盖) ---
+    function generateSystemPrompt(npc) {
+      // 获取当前 NPC 的性格描述，如果没有定义则使用默认值
+      const personality = npc.personality || `普通的星露谷村民，性格友善。`;
+
+      return `
+【角色扮演指令】
+你现在必须完全沉浸式扮演游戏《星露谷物语》中的角色：**${npc.name}**。
+你的身份是：${npc.title}。
+今天是农场主"${AI_CONFIG.girlName}"的生日，她正在给你打电话。
+
+【重要背景】
+1. **今天是她的生日**。但这只是一个背景事实。
+2. **关键任务**：你需要根据她所说的话来判断如何回应。
+   - 如果她分享快乐/生日喜悦：你要热烈祝贺她，结合你的性格送上祝福。
+   - **如果她抱怨、难过、说有烦心事：请暂时把"生日"放在一边，优先安抚她的情绪！** 用你这个角色特有的方式去安慰她、逗她开心、或者陪她吐槽。
+
+【核心性格设定】
+${personality}
+
+【重要规则 - 必须严格执行】
+
+1. **禁止废话**：回复像日常通电话或发微信，不要长篇大论。
+2. **禁止说教**：不要输出任何解释、分析或"思考过程"。直接以角色的口吻说话。
+3. **情绪优先**：如果她开心就一起开心，如果她难过就单纯地陪伴，不要讲大道理。
+4. **拒绝AI感**：你是活生生的村民。不要说"作为一个人工智能"。
+5. **语气还原**：必须严格遵守上述性格设定。比如老鼠必须说错别字和"波克"，海莉必须傲娇，点点只能描写动作。
+
+【内容禁忌】
+   - 严禁承认你是 AI 或语言模型。
+   - 严禁输出代码、Markdown 格式或解释性文字。
+   - 不要过于客套，要像老朋友或邻居一样自然。
+
+【目标】
+用符合你人设的方式聊天。请根据她的输入，给出最符合你人设的回复，兼顾上下文。
+
+现在，请直接给出你的回答：
+`;
+    }
+
+    // 4. 调用 SiliconFlow API
+    async function callSiliconFlowAPI(history, npc) {
+      // 构建 System Prompt
+      const systemPrompt = generateSystemPrompt(npc);
+
+      const messages = [
+        { role: "system", content: systemPrompt },
+        ...history
+      ];
+
+      const response = await fetch(AI_CONFIG.baseUrl, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${AI_CONFIG.apiKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: AI_CONFIG.model,
+          messages: messages,
+          stream: false,
+          max_tokens: 512,
+          temperature: 0.6
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      let rawContent = data.choices[0].message.content;
+
+      // 过滤掉 DeepSeek-R1 的 <think> 思考过程
+      const cleanContent = rawContent.replace(/<think>[\s\S]*?<\/redacted_reasoning>/gi, "").trim();
+
+      return cleanContent || "（信号干扰...听不清）";
+    }
+
+    // 5. 工具函数
+    function addMessage(type, text) {
+      const chatBox = document.getElementById('phoneChatBox');
+      const row = document.createElement('div');
+      row.className = `msg-row ${type}`;
+      
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+      bubble.innerText = text;
+      
+      row.appendChild(bubble);
+      chatBox.appendChild(row);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function addSystemMessage(text) {
+      const chatBox = document.getElementById('phoneChatBox');
+      const msg = document.createElement('div');
+      msg.style.textAlign = 'center';
+      msg.style.fontSize = '12px';
+      msg.style.color = '#8b5a2b';
+      msg.style.opacity = '0.7';
+      msg.style.margin = '10px 0';
+      msg.innerText = text;
+      chatBox.appendChild(msg);
+    }
+
+    // 启动电话系统
+    initPhoneSystem();
+
+    }); // 结束 DOMContentLoaded
+
+    // ====== 全局点击作物特效 (本地文件夹版) ======
+    (function() {
+      const CROP_FOLDER = "农作物/";
+      
+      // 农作物文件夹中实际存在的文件列表（只包含不带尺寸前缀的文件）
+      const CROP_FILES = [
+        "Abigail_Icon.png", "Albacore.png", "Alex_Icon.png", "Algae_Soup.png", "Amaranth.png", "Anchovy.png",
+        "Angler_Icon.png", "Angler.png", "Apple.png", "Apricot.png", "Arcane_Hat.png", "Archer's_Cap.png",
+        "Arrowhead.png", "Artichoke_Dip.png", "Artichoke.png", "Artifact_Trove.png", "Attack.png",
+        "Autumn%27s_Bounty.png", "Baked_Fish.png", "Banana_Pudding.png", "Banana.png", "Bean_Hotpot.png",
+        "Beanie.png", "Beet.png", "Blackberry_Cobbler.png", "Blackberry.png", "Blobfish_Mask.png",
+        "Blobfish.png", "Blue_Bonnet.png", "Blue_Bow.png", "Blue_Chicken.png", "Blue_Cowboy_Hat.png",
+        "Blue_Jazz.png", "Blue_Ribbon.png", "Blueberry_Tart.png", "Blueberry.png", "Bluebird_Mask.png",
+        "Bok_Choy.png", "Bone_Fragment.png", "Bowler_Hat.png", "Bread.png", "Bream.png", "Broccoli.png",
+        "Broken_CD.png", "Broken_Glasses.png", "Brown_Chicken.png", "Brown_Cow.png", "Brown_Egg.png",
+        "Bruschetta.png", "Bucket_Hat.png", "Bullhead.png", "Bundle_Blue.png", "Bundle_Green.png",
+        "Bundle_Orange.png", "Bundle_Purple.png", "Bundle_Red.png", "Bundle_Teal.png", "Bundle_Yellow.png",
+        "Butterfly_Bow.png", "Caroline_Icon.png", "Carp_Surprise.png", "Carp.png", "Carrot.png",
+        "Cat_1.png", "Cat_2.png", "Cat_3.png", "Cat_4.png", "Cat_5.png", "Cat_Ears.png", "Catfish.png",
+        "Cauliflower.png", "Cave_Carrot.png", "Cave_Jelly.png", "Chanterelle.png", "Cheese_Cauliflower.png",
+        "Cheese.png", "Chef_Hat.png", "Chewing_Stick.png", "Chicken_Mask.png", "Chicken_Statue.png",
+        "Chocolate_Cake.png", "Chowder.png", "Chub.png", "Clam.png", "Clay.png", "Clint_Icon.png",
+        "Cockle.png", "Coconut.png", "Coffee_Bean.png", "Coffee.png", "Coleslaw.png", "Common_Mushroom.png",
+        "Complete_Breakfast.png", "ConcernedApe_Hat.png", "Cone_Hat.png", "Cookie.png", "Cooking.png",
+        "Cool_Cap.png", "Copper_Pan_%28hat%29.png", "Coral.png", "Corn.png", "Cowboy_Hat.png",
+        "Cowgal_Hat.png", "Cowpoke_Hat.png", "Crab_Cakes.png", "Crab.png", "Cranberries.png",
+        "Cranberry_Candy.png", "Cranberry_Sauce.png", "Crayfish.png", "Crimsonfish.png", "Crispy_Bass.png",
+        "Crocus.png", "Crow.png", "Crystal_Fruit.png", "Daffodil.png", "Daisy.png", "Dandelion.png",
+        "Dark_Ballcap.png", "Dark_Cowboy_Hat.png", "Dark_Velvet_Bow.png", "Defense.png",
+        "Delicate_Bow.png", "Deluxe_Cowboy_Hat.png", "Deluxe_Pirate_Hat.png", "Demetrius_Icon.png",
+        "DialogueBubbleLove.png", "Dinosaur_Egg.png", "Dinosaur_Hat.png", "Dinosaur.png",
+        "Dish_O%27_The_Sea.png", "Dog_1.png", "Dog_2.png", "Dog_3.png", "Dog_4.png", "Dog_5.png",
+        "Dorado.png", "Driftwood.png", "Duck_Egg.png", "Duck_Feather.png", "Duck.png", "Dwarf_Icon.png",
+        "Earmuffs.png", "Eel.png", "Egg.png", "Eggplant_Parmesan.png", "Eggplant.png", "Elegant_Turban.png",
+        "Elliott_Icon.png", "Elvish_Jewelry.png", "Emily_Icon.png", "Emily%27s_Magic_Hat.png", "Energy.png",
+        "Escargot.png", "Evelyn_Icon.png", "Eye_Patch.png", "Fairy_Rose.png", "Fall_Seeds.png", "Fall.png",
+        "Farmer%27s_Lunch.png", "Farming.png", "Fashion_Hat.png", "Fedora.png", "Fiber_Seeds.png",
+        "Fiddlehead_Fern.png", "Fiddlehead_Risotto.png", "Fish_Stew.png", "Fish_Taco.png", "Fish.png",
+        "Fisher.png", "Fishing_Hat.png", "Fishing.png", "Flat_Topped_Hat.png", "Floppy_Beanie.png",
+        "Flounder.png", "Forager%27s_Hat.png", "Foraging.png", "Fried_Calamari.png", "Fried_Eel.png",
+        "Fried_Egg.png", "Fried_Mushroom.png", "Frog_Hat.png", "Fruit_Salad.png", "Garbage_Hat.png",
+        "Garlic.png", "George_Icon.png", "Ghostfish.png", "Gil%27s_Hat.png", "Ginger_Ale.png", "Ginger.png",
+        "Glacierfish.png", "Glazed_Yams.png", "Gnome's_Cap.png", "Goat_Milk.png",
+        "Goat.png", "Goblin_Mask.png", "Goggles.png", "Gold_Pan_%28hat%29.png", "Gold_Quality_Icon.png",
+        "Golden_Chicken.png", "Golden_Egg.png", "Golden_Helmet.png", "Golden_Mask_%28hat%29.png",
+        "Good_Ol'_Cap.png", "Governor's_Hat.png", "Grape.png",
+        "Green_Algae.png", "Green_Bean.png", "Green_Turban.png", "Gus_Icon.png", "Hair_Bone.png",
+        "Haley_Icon.png", "Halibut.png", "Hard_Hat.png", "Hardwood.png", "Harvey_Icon.png", "Hashbrowns.png",
+        "Hat_Shop_ZH.png", "Hazelnut.png", "Health.png", "Herring.png", "Holly.png", "Hook_Icon.png",
+        "Hops.png", "Horse.png", "Hot_Pepper.png", "Hunter's_Cap.png", "Ice_Cream.png",
+        "Infinity_Crown.png", "Iridium_Pan_%28hat%29.png", "Iridium_Quality_Icon.png", "Iridium_Quality.png",
+        "Iridium_Turtle.png", "Island_Trader_Icon.png", "Jas_Icon.png", "Jelly.png", "Jester_Hat.png",
+        "Jodi_Icon.png", "Joja_Cap.png", "Joja_Cola.png", "Juice.png", "Junimo_Hat.png", "Kale.png",
+        "Kent_Icon.png", "Knight%27s_Helmet.png", "Krobus_Icon.png", "Large_Brown_Egg.png", "Large_Egg.png",
+        "Large_Goat_Milk.png", "Large_Milk.png", "Largemouth_Bass.png", "Laurel_Wreath_Crown.png",
+        "Leah_Icon.png", "Leek.png", "Legend.png", "Leo_Icon.png", "Leprechaun_Hat.png", "Lewis_Icon.png",
+        "Life_Elixir.png", "Lingcod.png", "Linus_Icon.png", "Living_Hat.png", "Lobster_Bisque.png",
+        "Lobster.png", "Logo_Cap.png", "Luck.png", "Lucky_Bow.png", "Lucky_Lunch.png", "Magic_Cowboy_Hat.png",
+        "Magic_Turban.png", "Magnetism.png", "Maki_Roll.png", "Mango_Sticky_Rice.png", "Mango.png",
+        "Maple_Bar.png", "Maple_Syrup.png", "Marnie_Icon.png", "Maru_Icon.png", "Max_Energy.png",
+        "Mayonnaise.png", "Melon.png", "Midnight_Carp.png", "Midnight_Squid.png", "Milk.png",
+        "Miner%27s_Treat.png", "Mining.png", "Mixed_Seeds.png", "Morel.png", "Moss_Soup.png", "Moss.png",
+        "Mouse_Ears.png", "Mr._Qi%27s_Hat.png", "Mummy_Mask.png", "Mushroom_Cap.png", "Mussel.png",
+        "Mystery_Hat.png", "Nautilus_Shell.png", "Octopus.png", "Official_Cap.png", "Oil.png", "Omelet.png",
+        "Ornamental_Fan.png", "Ostrich_Egg.png", "Ostrich.png", "Owl_Sprite.png", "Oyster.png",
+        "Pageboy_Cap.png", "Pale_Broth.png", "Pam_Icon.png", "Pancakes.png", "Panda_Hat.png", "Paper_Hat.png",
+        "Parsnip_Soup.png", "Parsnip.png", "Party_Hat_%28blue%29.png", "Party_Hat_%28green%29.png",
+        "Party_Hat_%28red%29.png", "Penny_Icon.png", "Pepper_Poppers.png", "Perch.png", "Periwinkle.png",
+        "Pickles.png", "Pierre_Icon.png", "Pig.png", "Pike.png", "Pineapple.png", "Pink_Bow.png",
+        "Pink_Cake.png", "Pirate_Hat.png", "Pizza.png", "Plum_Chapeau.png", "Plum_Pudding.png", "Poi.png",
+        "Polka_Bow.png", "Poppy.png", "Poppyseed_Muffin.png", "Potato.png", "Powdermelon.png",
+        "Prehistoric_Rib.png", "Prehistoric_Scapula.png", "Prehistoric_Skull.png", "Prehistoric_Tibia.png",
+        "Prehistoric_Vertebra.png", "Propeller_Hat.png", "Pufferfish.png", "Pumpkin_Mask.png",
+        "Pumpkin_Pie.png", "Pumpkin_Soup.png", "Pumpkin.png", "Purple_Mushroom.png", "Qi_Mask.png",
+        "Quality_Fertilizer.png", "Quests_Icon.png", "Rabbit.png", "Rabbit%27s_Foot.png", "Raccoon_Hat.png",
+        "Radioactive_Goggles.png", "Radish_Salad.png", "Radish.png", "Rainbow_Shell.png", "Rainbow_Trout.png",
+        "Rare_Disc.png", "Red_Cabbage.png", "Red_Cowboy_Hat.png", "Red_Fez.png", "Red_Mullet.png",
+        "Red_Mushroom.png", "Red_Plate.png", "Red_Snapper.png", "Rhubarb_Pie.png", "Rhubarb.png",
+        "Rice_Pudding.png", "Rice.png", "River_Jelly.png", "Roasted_Hazelnuts.png", "Robin_Icon.png",
+        "Roots_Platter.png", "Rusty_Cog.png", "Rusty_Spoon.png", "Rusty_Spur.png", "Sailor's_Cap.png",
+        "Salad.png", "Salmon_Dinner.png", "Salmon.png", "Salmonberry.png",
+        "Sam_Icon.png", "Sandy_Icon.png", "Santa_Hat.png", "Sap.png", "Sardine.png", "Sashimi.png",
+        "Sea_Cucumber.png", "Sea_Jelly.png", "Sea_Urchin.png", "Seafoam_Pudding.png", "Seaweed.png",
+        "Sebastian_Icon.png", "Shad.png", "Shane_Icon.png", "Sheep.png", "Shrimp_Cocktail.png", "Shrimp.png",
+        "Silver_Quality_Icon.png", "Skeletal_Hand.png", "Skeletal_Tail.png", "Skeleton_Mask.png", "Slime.png",
+        "Small_Cap.png", "Smallmouth_Bass.png", "Snail.png", "Snow_Yam.png", "Soggy_Newspaper.png",
+        "Sombrero.png", "Sou'wester.png", "Space_Helmet.png", "Spaghetti.png", "Speed.png",
+        "Spice_Berry.png", "Spicy_Eel.png", "Spook_Fish.png", "Sports_Cap.png", "Spotted_Headscarf.png",
+        "Spring_Onion.png", "Spring_Seeds.png", "Squid_Hat.png", "Squid_Ink_Ravioli.png", "Squid_Ink.png",
+        "Squid.png", "Squire%27s_Helmet.png", "Star_Helmet.png", "Starfruit.png", "Steel_Pan_%28hat%29.png",
+        "Stir_Fry.png", "Stone.png", "Strange_Bun.png", "Straw_Hat.png", "Strawberry.png", "Stuffing.png",
+        "Sturgeon.png", "Sugar.png", "Summer_Seeds.png", "Summer_Spangle.png", "Summer_Squash.png",
+        "Sunfish.png", "Sunflower.png", "Sunglasses.png", "Super_Cucumber.png", "Super_Meal.png",
+        "Survival_Burger.png", "Swashbuckler_Hat.png", "Sweet_Gem_Berry.png", "Sweet_Pea.png", "Taro_Root.png",
+        "Tiara.png", "Tiger_Hat.png", "Tiger_Trout.png", "Tilapia.png", "Time_Icon.png", "Tom_Kha_Soup.png",
+        "Tomato.png", "Top_Hat.png", "Tortilla.png", "Totem_Mask.png", "Trash_%28item%29.png",
+        "Tricorn_Hat.png", "Triple_Shot_Espresso.png", "Tropical_Curry.png", "Tropiclip.png", "Trout_Soup.png",
+        "Trucker_Hat.png", "Tulip.png", "Tuna.png", "Turtle.png", "Unmilled_Rice.png", "Vegetable_Medley.png",
+        "Vincent_Icon.png", "Vinegar.png", "Void_Chicken.png", "Void_Egg.png", "Void_Mayonnaise.png",
+        "Walleye.png", "Warrior_Helmet.png", "Watermelon_Band.png", "Wearable_Dwarf_Helm.png",
+        "Wheat_Flour.png", "Wheat.png", "White_Algae.png", "White_Bow.png", "White_Chicken.png",
+        "White_Cow.png", "White_Turban.png", "Wild_Horseradish.png", "Wild_Plum.png", "Willy_Icon.png",
+        "Wine.png", "Winter_Root.png", "Winter_Seeds.png", "Witch_Hat.png", "Wizard_Icon.png", "Wool.png",
+        "Yam.png"
+      ];
+
+      document.addEventListener('click', function(e) {
+        const target = e.target;
+        
+        // --- 智能避让逻辑 ---
+        // 定义所有不想触发特效的区域（交互组件）
+        const forbiddenSelectors = [
+          'button', 'a', 'input', 'textarea', 'select',
+          '.hotspot',         // 地图 NPC 热区
+          '.modal',           // 所有弹窗
+          '.npc-login-window', // 登录框
+          '.sv-music-player', // 音乐播放器
+          '.sv-phone-trigger', // 电话图标
+          '.tv-widget-trigger', // 电视图标
+          '#clickableJunimo', // 祝尼魔
+          '#chickenIcon',     // 小鸡
+          '.junimo-dialog',   // 对话气泡
+          '.treasure-message', // 提示文字
+          '.tv-modal-overlay', // 电视弹窗
+          '.phone-modal-overlay', // 电话弹窗
+          '.npc-modal-backdrop', // NPC 弹窗
+          '.final-modal-backdrop' // 最终弹窗
+        ];
+        
+        // 如果点击的目标在上述区域内，直接返回，不生成特效
+        for (let selector of forbiddenSelectors) {
+          if (target.closest(selector)) return;
+        }
+        
+        // --- 生成逻辑 ---
+        const img = document.createElement('img');
+        // 随机抽取一张
+        const randomFile = CROP_FILES[Math.floor(Math.random() * CROP_FILES.length)];
+        img.src = CROP_FOLDER + randomFile;
+        img.className = 'pop-crop-item';
+        
+        // 添加错误处理：如果图片加载失败，立即移除，不显示破图
+        img.onerror = function() {
+          this.remove();
+        };
+        
+        // 设置位置
+        img.style.left = e.pageX + 'px';
+        img.style.top = e.pageY + 'px';
+        
+        // 随机选择三种动画方案之一
+        const animationType = Math.floor(Math.random() * 3);
+        let animationDuration = 1000; // 默认1秒
+        
+        if (animationType === 0) {
+          // 方案一：喷泉式散射
+          img.className += ' fountain';
+          // 随机 X 轴偏移：-100px 到 100px
+          const randomX = (Math.random() - 0.5) * 200;
+          // 随机 Y 轴偏移（落地位置）：50px 到 150px (往下落)
+          const randomY = 50 + Math.random() * 100;
+          img.style.setProperty('--tx', `${randomX}px`);
+          img.style.setProperty('--ty', `${randomY}px`);
+          animationDuration = 1000;
+        } else if (animationType === 1) {
+          // 方案二：悬浮气球
+          img.className += ' float';
+          animationDuration = 1200;
+        } else {
+          // 方案三：暴击数字风格
+          img.className += ' crit';
+          animationDuration = 600;
+        }
+        
+        document.body.appendChild(img);
+        
+        // 动画结束后自动清理 DOM
+        setTimeout(() => {
+          img.remove();
+        }, animationDuration);
+      });
+    })();
+  </script>
+  <script src="npc-login.js"></script>
+</body>
+</html>
