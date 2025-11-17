@@ -22,7 +22,7 @@ git commit -m "Initial commit"
 
 git branch -M main
 
-git remote add origin https://github.com/你的用户名/benbao.git
+git remote add origin https://github.com/tianuu-u/benbao.git
 
 git push -u origin main
 
@@ -36,7 +36,7 @@ git push -u origin main
 4. Source 选择 "Deploy from a branch"
 5. Branch 选择 "main"，文件夹选择 "/ (root)"
 6. 点击 "Save"
-7. 等待几分钟，你的网站就会在 https://你的用户名.github.io/benbao 上可用
+7. 等待几分钟，你的网站就会在 https://tianuu-u.github.io/benbao 上可用
 
 ## 如果上传失败（文件太多）
 
