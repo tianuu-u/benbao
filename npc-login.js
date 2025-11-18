@@ -51,7 +51,7 @@ const npcDialogPool = [
       {
         label: "Charlie 真可爱！它的羽毛很亮。",
         resultPortrait: "pleased",
-        result: "「嘿嘿……你也这么觉得？好兄弟/姐妹。Charlie 喜欢你。进去吧，我要带它去吃点披萨边角料。」",
+        result: "「嘿嘿……你也这么觉得？好姐妹。Charlie 喜欢你。进去吧，我要带它去吃点披萨边角料。」",
       },
       {
         label: "谢恩，你是不是喝多了？醒醒！（推一下）",
