@@ -155,7 +155,7 @@ const npcDialogPool = [
   },
   {
     id: "linus",
-    name: "利纳斯",
+    name: "莱纳斯",
     title: "卑微又善良的流浪者",
     portraits: {
       intro: `${IMAGE_BASE}/Linus_Concerned.png`,
@@ -164,7 +164,7 @@ const npcDialogPool = [
     intro: `「……请别扔石头。我只是……只是闻到了蛋糕的香味，想在远处悄悄对 ${GIRL_NAME} 说声生日快乐。我不会进去打扰你们的。」`,
     options: [
       {
-        label: `别这么说，利纳斯。${GIRL_NAME} 说过，你是她最好的朋友之一。一起来吧。`,
+        label: `别这么说，莱纳斯。${GIRL_NAME} 说过，你是她最好的朋友之一。一起来吧。`,
         resultPortrait: "happy",
         result: "「真、真的吗？你们愿意接纳我这个老头子？……谢谢。那我就站在角落里，为她祈祷大自然的祝福。」",
       },
@@ -269,7 +269,7 @@ const npcDialogPool = [
   },
   {
     id: "pam",
-    name: "帕姆",
+    name: "潘姆",
     title: "豪爽的巴士司机",
     portraits: {
       intro: `${IMAGE_BASE}/Pam_Annoyed.png`,
@@ -764,9 +764,9 @@ npcDialogPool.push(
         result: "「哈哈！那可是个艰巨的任务，因为我准备的分量可是超级加倍的！快进去吧，别让热菜凉了！」",
       },
       {
-        label: "格斯，帕姆说她的酒钱记在我的账上……",
+        label: "格斯，潘姆说她的酒钱记在我的账上……",
         resultPortrait: "happy",
-        result: "「哦，你真是个慷慨的人。帕姆的账单……嗯……那可是一笔不小的数目。不过为了庆祝生日，今晚全场我请客！进去尽情吃吧！」",
+        result: "「哦，你真是个慷慨的人。潘姆的账单……嗯……那可是一笔不小的数目。不过为了庆祝生日，今晚全场我请客！进去尽情吃吧！」",
       },
       {
         label: "给我来一杯‘星之果实’特饮。",
